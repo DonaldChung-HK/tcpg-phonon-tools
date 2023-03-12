@@ -29,13 +29,20 @@ def get_primirive(
         print("This space group doesn't have a more primitive unit cell.")
         raise RuntimeError
     else:
-        results = Atoms(
+        result = Atoms(
                 scaled_positions=positions,
                 cell=cell,
                 numbers=atomic_numbers,
                 pbc=True)
-        
-    return results
+    
+
+    lattice_param = result.get_cell_lengths_and_angles()
+    print(lattice_param)
+    print("Result:")
+    print("--------------")
+    print("Unit Cell: a: {}, b: {}, c: {}, alpha: {}, beta: {}, gamma: {}".format(*lattice_param))
+
+    return result
         
 def main():
     parser = argparse.ArgumentParser(
@@ -82,6 +89,7 @@ def main():
         SYMPREC=args.threshold,
         ANGLE_TOL=args.angle_tolerance,
     )
+    
 
     if args.output_file == None:
         print('No output file inputed')

@@ -1,0 +1,4 @@
+Parallel {
+    UseOmpThreads = $use_onp_thread
+    Groups = $num_groups
+}
