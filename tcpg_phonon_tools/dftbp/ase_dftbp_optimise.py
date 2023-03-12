@@ -55,9 +55,7 @@ def ase_dftbp_optimise(
         system.set_constraint(FixSymmetry(system))
 
     if lattice_opt:
-        system_in = UnitCellFilter(system)
-    else:
-        system_in = system
+        system = UnitCellFilter(system)
     
     traj_name = f"{seed_name}.traj"
     log_name = f"{seed_name}.log"
@@ -68,22 +66,22 @@ def ase_dftbp_optimise(
         system.set_calculator(calc)
         if optimiser == "BFGS":
             from ase.optimize import BFGS
-            opt = BFGS(system_in, trajectory=traj_name, logfile=log_name)
+            opt = BFGS(system, trajectory=traj_name, logfile=log_name)
         elif optimiser == "LBFGS":
             from ase.optimize import LBFGS
-            opt = LBFGS(system_in, trajectory=traj_name, logfile=log_name)
+            opt = LBFGS(system, trajectory=traj_name, logfile=log_name)
         elif optimiser == "LBFGSLineSearch":
             from ase.optimize import LBFGSLineSearch
-            opt = LBFGSLineSearch(system_in, trajectory=traj_name, logfile=log_name)
+            opt = LBFGSLineSearch(system, trajectory=traj_name, logfile=log_name)
         elif optimiser == "GPMin":
             from ase.optimize import GPMin
-            opt = GPMin(system_in, trajectory=traj_name, logfile=log_name)
+            opt = GPMin(system, trajectory=traj_name, logfile=log_name)
         elif optimiser == "FIRE":
             from ase.optimize import FIRE
-            opt = FIRE(system_in, trajectory=traj_name, logfile=log_name)
+            opt = FIRE(system, trajectory=traj_name, logfile=log_name)
         elif optimiser == "MDMin":
             from ase.optimize import MDMin
-            opt = MDMin(system_in, trajectory=traj_name, logfile=log_name)
+            opt = MDMin(system, trajectory=traj_name, logfile=log_name)
         else:
             raise OptimiserNotIncludedException(f"{optimiser} is not a recognised optimiser")
         opt.run(fmax=f_max)
