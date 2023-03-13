@@ -301,7 +301,7 @@ def run_castep(
 
     # Cell settings
     # calc.cell.kpoint_mp_grid = kpoint_mp_grid
-    calc.set_kpts(k_pts, gamma=on_gamma)
+    calc.set_kpts({'size': k_pts, 'gamma': on_gamma})
     
     # setting or override any other attribute in .cell
     for key, value in cell_keyword.items():
