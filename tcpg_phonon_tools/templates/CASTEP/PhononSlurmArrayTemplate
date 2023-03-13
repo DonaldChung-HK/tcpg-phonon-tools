@@ -9,7 +9,7 @@
 
 module purge
 module load AMDmodules
-module load Python/3.9.6-GCCcore-11.2.0
+module load Python/3.10.4-GCCcore-11.3.0
 module load CASTEP/21.1.1-iomkl-2021a
 module list
 
