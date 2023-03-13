@@ -28,12 +28,14 @@ def main():
             ],
         keywords='chemistry ase dftb+ xTB mantid',
         packages=find_packages(),
-        install_requires=['ase', 'spglib', 'matplotlib', 'phonopy'],
+        install_requires=['ase', 'spglib', 'matplotlib','pandas', 'scipy','matplotlib', 'phonopy'],
         entry_points={
             'console_scripts': [
                 'dftbp-socket-setup = tcpg_phonon_tools.dftbp_socket_hsd_setup:main',
                 'ase-get-primitive = tcpg_phonon_tools.ase_get_primitive:main',
                 'ase-dftbp-optimise = tcpg_phonon_tools.ase_dftbp_optimise:main',
+                'abins-mantid-runner = tcpg_phonon_tools.Analysis.MantidHelper:cli_mantid_abins',
+                'emd-chart = tcpg_phonon_tools.Analysis.Visualise:emd_and_chart'
                 ]
             },
         include_package_data=True,

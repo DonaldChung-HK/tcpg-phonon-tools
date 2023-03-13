@@ -1,13 +1,16 @@
 from pathlib import Path
 from subprocess import run
 import re
-import shutil
 import warnings
 from tcpg_phonon_tools.Slurm.SlurmJobHelper import gen_slurm
+from importlib.resources import files
+import tcpg_phonon_tools.templates.CASTEP as python_script_template_path
+
 
 def phonopy_setup(
     working_dir,
     opt_in_file_name,
+    k_pts = (2,2,2),
     supercell = "2 2 2",
     not_gen_slurm = False,
     label = "foo",
@@ -37,7 +40,9 @@ def phonopy_setup(
             pur = re.search("^0*[1-9][0-9]*$", file.name)[-1] #hoping that no changing the filename structure usually the last set of zero paded number is the correct one
             if pur not in pur_list:
                 pur_list.append(pur)
-                shutil.copyfile(file, storage_path / file.name)
+                pur_path = result_path / pur
+                pur_path.mkdir(exist_ok=True)
+                file.rename(storage_path / f"{pur}.cell")
 
     pur_list.sort(key=int) #sorting it by number
     
@@ -48,7 +53,10 @@ def phonopy_setup(
     for i in range(len(pur_list)):
         if test_range[i] != int(pur_list[i]):
             warnings.warn("the displacement list might not be contineous")
-
+    #copy a script from template to folder for customisatin if needed
+    castep_python_script_template_file = files(python_script_template_path).joinpath('CastepPhononRunTemplate').read_text()
+    with open("run.py", "x") as f:
+        f.write(castep_python_script_template_file)
     #setup a slurm to run recurrsively by loading different supercell and running it with the accompanying files
     if not not_gen_slurm:
         gen_slurm(
@@ -62,12 +70,12 @@ def phonopy_setup(
                 f"--array={start}-{end}"
             ],
             set_ups=[
-                f"soource {path_to_venv}",
-                "CASE_NUM=`printf %03d $SLURM_ARRAY_TASK_ID`"
+                f"source {path_to_venv}",
+                "CASENUM=`printf %03d $SLURM_ARRAY_TASK_ID`"
                 f"export CASTEP_COMMAND = '{CASTEP_command}'"
             ],
             commands=[
-                f"{CASTEP_command} run.py $CASE_NUM"
+                f"python run.py -f ./storage/$CASENUM.cell -k {k_pts[0]} {k_pts[1]} {k_pts[2]} -p ./run/$CASENUM -l {label}_$CASENUM"
             ]
         )
 

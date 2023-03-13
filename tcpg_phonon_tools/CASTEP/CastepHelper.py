@@ -14,6 +14,69 @@ def is_fail_in_waring(_warnings):
             return True
     return False
 
+
+def run_castep_single_point_phonopy(
+    system,
+    k_pts = (2,2,2),
+    on_gamma = True,
+    directory = "CASTEP",
+    label = "system",
+    param_keyword = {
+        "task":'SinglePoint',
+        "basis_precision":'precise',
+        "xc_functional":'PBE',
+        "sedc_scheme":'G06',
+        "finite_basis_corr":'AUTOMATIC',
+        "geom_force_tol": 1e-4,
+        "elec_force_tol": 1e-6,
+        "elec_energy_tol": 1e-7,
+        "geom_max_iter": 300,
+        "grid_scale":2.5,
+        "max_scf_cycles":300,
+    },
+    cell_keyword = {},
+    ):
+    """wrapper for single point usually using phonopy
+    use 'export CASTEP_COMMAND = "mpirun castep.mpi "' tp set the castep command
+    param_keyword = {
+        "task":'SinglePoint',
+        "basis_precision":'precise',
+        "xc_functional":'PBE',
+        "sedc_scheme":'G06',
+        "finite_basis_corr":'AUTOMATIC',
+        "geom_force_tol": 1e-4,
+        "elec_force_tol": 1e-6,
+        "elec_energy_tol": 1e-7,
+        "geom_max_iter": 300,
+        "grid_scale":2.5,
+        "max_scf_cycles":300,
+    }
+    cell_keyword = {}
+    Args:
+        system (ase.Atoms): Atom system to use
+        k_pts (tuple, optional): MP kpoints . Defaults to (2,2,2).
+        on_gamma (bool, optional): is doing kpoint on gamma. Defaults to True.
+        directory (str, optional): name of the directory to put castep in. Defaults to "CASTEP".
+        label (str, optional): seed name of the run. Defaults to "system".
+        param_keyword (dict, optional): dict of castep keyword for .param .
+        cell_keyword (dict, optional): dict of ovcastep keyword for .cell note that the kpoint is set already using calc.set_kpoints.
+    """
+    # note to self for other keyword
+    # geom_modulus_est = 2000 to cheat the optimizer into smalller steps
+    # cutoff_energy = int to have a fixed cutoff energy for basis set
+    # sedc_apply = False to not apply sedc PBESOL is not compatible with SEDC since the cell is too small
+
+    result = run_castep(
+        system = system,
+        k_pts = k_pts,
+        on_gamma = on_gamma,
+        directory = directory,
+        label = label,
+        param_keyword = param_keyword,
+        cell_keyword = cell_keyword,
+    )
+    return result
+
 def run_castep_opt(
     system,
     k_pts = (2,2,2),
@@ -28,7 +91,7 @@ def run_castep_opt(
         "finite_basis_corr":'AUTOMATIC',
         "geom_force_tol": 1e-4,
         "elec_force_tol": 1e-6,
-        "elec_energy_tol": 1e-7,
+        "elec_energy_tol": 1e-9,
         "geom_max_iter": 300,
         "grid_scale":2.5,
         "max_scf_cycles":300,
