@@ -69,10 +69,11 @@ def phonopy_setup(
                 f"--time={wall_time}",
                 f"--array={start}-{end}"
             ],
+            modules=[],
             set_ups=[
                 f"source {path_to_venv}",
                 "CASENUM=`printf %03d $SLURM_ARRAY_TASK_ID`"
-                f"export CASTEP_COMMAND = '{CASTEP_command}'"
+                f"export CASTEP_COMMAND='{CASTEP_command}'"
             ],
             commands=[
                 f"python run.py -f ./storage/$CASENUM.cell -k {k_pts[0]} {k_pts[1]} {k_pts[2]} -p ./run/$CASENUM -l {label}_$CASENUM"

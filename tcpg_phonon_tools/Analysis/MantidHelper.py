@@ -70,13 +70,11 @@ def cli_mantid_abins():
         help="DFT program which was used for a phonon calculation. Allowed values: [FORCECONSTANT, CASTEP, CRYSTAL]")
     parser.add_argument(
         '-c',
-        '--SumContributions',
-        action="store_true",
-        type=bool,
-        default=True,
-        help="Sum the partial dynamical structure factors into a single workspace.")
+        '--NotSumContributions',
+        action="store_false",
+        help="Not Sum the partial dynamical structure factors into a single workspace.")
     parser.add_argument(
-        '-s',
+        '-r',
         '--ScaleByCrossSection',
         type=str,
         default='Total',
@@ -89,23 +87,15 @@ def cli_mantid_abins():
         help="Number of quantum order effects included in the calculation (1 -> FUNDAMENTALS, 2-> first overtone + FUNDAMENTALS + 2nd order combinations, 3-> FUNDAMENTALS + first overtone + second overtone + 2nd order combinations + 3rd order combinations etc...). Allowed values: [‘1’, ‘2’, ‘3’, ‘4’]")
     parser.add_argument(
         '-a',
-        '--Autoconvolution',
-        type=str,
-        action="store_true",
-        default=True,
-        help="Autoconvolution in Abins")
+        '--NotAutoconvolution',
+        action="store_false",
+        help="Not Autoconvolution in Abins")
     parser.add_argument(
         '-s',
         '--Setting',
         type=str,
-        default='FOO',
+        default='All detectors (TOSCA)',
         help="Setting variable for Abins e.g 'All detectors (TOSCA)'")
-    parser.add_argument(
-        '-p',
-        '--castep_run_path',
-        type=str,
-        default='FOO',
-        help="castep run path")
     parser.add_argument(
         '-w',
         '--BinWidthInWavenumber',
@@ -117,7 +107,7 @@ def cli_mantid_abins():
         '--retrieve_items',
         type=str,
         nargs='+',
-        default=["total"],
+        default=["Total"],
         help="the spectra name you want to retrieve like 'total', 'H1' etc.")
     
     parser.add_argument(
@@ -129,14 +119,15 @@ def cli_mantid_abins():
 
     
     args = parser.parse_args()
+    
     run_abins(
         label = args.label,
         input_file = args.input_file,
         AbInitioProgram=args.AbInitioProgram,
-        SumContributions=args.SumContributions,
+        SumContributions=args.NotSumContributions,
         ScaleByCrossSection=args.ScaleByCrossSection,
         QuantumOrderEventsNumber = str(args.QuantumOrderEventsNumber),
-        Autoconvolution = args.Autoconvolution,
+        Autoconvolution = args.NotAutoconvolution,
         Setting = args.Setting,
         BinWidthInWavenumber = args.BinWidthInWavenumber,
         retrieve_items = args.retrieve_items,

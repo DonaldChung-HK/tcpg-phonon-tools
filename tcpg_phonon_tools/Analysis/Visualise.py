@@ -33,7 +33,7 @@ def emd_and_chart(
 
     ref_y_inter = f(calculated_x)
 
-
+    y_top = max(max(ref_y_inter), max(calculated_y)) * 1.05
 
     emd_calc = wasserstein_distance(ref_y_inter, calculated_y)
     emd_string = f"EMD: {emd_calc}"
@@ -47,7 +47,8 @@ def emd_and_chart(
     axes.set_title(f'Ref VS Calculated | {emd_string}')
     axes.set_xlabel('Energy transfer ($cm^{-1}$)')
     axes.set_ylabel('S / Arbitrary Units ($cm^{-1}$)$^{-1}$')
-    axes.set_xlim([0, 4000])
+    axes.set_xlim([0, cut_off])
+    axes.set_ylim([0, y_top])
     legend = axes.legend(fontsize=8.0).set_draggable(True).legend
 
     if out_path != None:
