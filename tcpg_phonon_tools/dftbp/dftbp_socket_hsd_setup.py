@@ -3,62 +3,7 @@ from string import Template
 import argparse
 import tcpg_phonon_tools.templates.dftbp.dftbp_socket_calc as dftbp_socket_calc_template
 
-def main():
-    parser = argparse.ArgumentParser(
-        description="create a file called dftb_in.hsd in the current directory fails if one already exist")
-    parser.add_argument(
-        '-m',
-        '--xtb_method',
-        type=str,
-        default='GFN2-xTB',
-        help="xTB method: ['GFN1-xTB', 'GFN2-xTB', 'IPEA1-xTB']")
-    parser.add_argument(
-        '-k',
-        '--k_pts',
-        type=int,
-        nargs=3,
-        default=[2,2,2],
-        help="Monkhorst-Pack k-points tuple as list of int will alos automatically compute whether an offset is needed")
-    parser.add_argument(
-        '-n',
-        '--socket_name',
-        type=str,
-        default="dftbplus",
-        help="name of the unix socket file to be used")
-    parser.add_argument(
-        '-s',
-        '--hamiltonian_solver',
-        type=str,
-        default='RelativelyRobust',
-        help="name of the hamiltonian solver: 'QR', 'DivideAndConquer', 'RelativelyRobust', 'MAGMA'")
-    parser.add_argument(
-        '-t', 
-        '--scc_tol',
-        type=str, 
-        default=1e-7, help="SCC cycle tolerence")
-    parser.add_argument(
-        '-p', 
-        '--max_steps',
-        type=int, 
-        default=1000, help="Max allowed SCC cycle")
-    parser.add_argument(
-        '-x', 
-        '--max_scc_cycles',
-        type=int, 
-        default=300, help="Max allowed SCC cycle")
-    
-    args = parser.parse_args()
-    gen_dftb_in = gen_dftb_in(
-        k_pts = args.k_pts,
-        socket_name = args.socket_name,
-        max_steps = args.max_steps,
-        xtb_method = args.xtb_method,
-        max_scc_cycles = args.max_scc_cycles,
-        scc_tol = args.scc_tol,
-        hamiltonian_solver = args.hamiltonian_solver,
-        out_file = "dftb_in.hsd"
-    )
-    
+
 
 
 def gen_dftb_in(
@@ -120,7 +65,62 @@ def gen_dftb_in(
 
     return dftb_in_hsd_result
 
-
+def main():
+    parser = argparse.ArgumentParser(
+        description="create a file called dftb_in.hsd in the current directory fails if one already exist")
+    parser.add_argument(
+        '-m',
+        '--xtb_method',
+        type=str,
+        default='GFN2-xTB',
+        help="xTB method: ['GFN1-xTB', 'GFN2-xTB', 'IPEA1-xTB']")
+    parser.add_argument(
+        '-k',
+        '--k_pts',
+        type=int,
+        nargs=3,
+        default=[2,2,2],
+        help="Monkhorst-Pack k-points tuple as list of int will alos automatically compute whether an offset is needed")
+    parser.add_argument(
+        '-n',
+        '--socket_name',
+        type=str,
+        default="dftbplus",
+        help="name of the unix socket file to be used")
+    parser.add_argument(
+        '-s',
+        '--hamiltonian_solver',
+        type=str,
+        default='RelativelyRobust',
+        help="name of the hamiltonian solver: 'QR', 'DivideAndConquer', 'RelativelyRobust', 'MAGMA'")
+    parser.add_argument(
+        '-t', 
+        '--scc_tol',
+        type=str, 
+        default=1e-7, help="SCC cycle tolerence")
+    parser.add_argument(
+        '-p', 
+        '--max_steps',
+        type=int, 
+        default=1000, help="Max allowed SCC cycle")
+    parser.add_argument(
+        '-x', 
+        '--max_scc_cycles',
+        type=int, 
+        default=300, help="Max allowed SCC cycle")
+    
+    args = parser.parse_args()
+    dftb_in = gen_dftb_in(
+        k_pts = args.k_pts,
+        socket_name = args.socket_name,
+        max_steps = args.max_steps,
+        xtb_method = args.xtb_method,
+        max_scc_cycles = args.max_scc_cycles,
+        scc_tol = args.scc_tol,
+        hamiltonian_solver = args.hamiltonian_solver,
+        out_file = "dftb_in.hsd"
+    )
+    
 
 if __name__ == "__main__":
     main()

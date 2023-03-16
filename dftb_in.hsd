@@ -1,0 +1,35 @@
+Geometry = GenFormat {
+    # geometry input file
+    <<< geo.gen
+}
+Driver = Socket {
+  File = "dftbplus"
+  Protocol = i-PI {}
+  MaxSteps = 1000
+  Verbosity = 0
+}
+
+Hamiltonian = xTB {
+    Method = "GFN2-xTB"
+    MaxSCCIterations = 300
+    SCCTolerance = 1e-07
+    # Example uses a fairly large supercell, so not many k-points are included
+    KPointsAndWeights = SupercellFolding {
+        2 0 0
+        0 2 0
+        0 0 2
+        0.5 0.5 0.5
+    }
+    Solver = RelativelyRobust { } 
+}
+
+Options = {
+    # Required options for storing data needed by phonopy
+    WriteResultsTag = Yes
+}
+
+
+Analysis = {
+    # required option for phonopy
+    CalculateForces = Yes
+}
