@@ -53,9 +53,6 @@ def ase_dftbp_optimise(
     
     if fix_sym:
         system.set_constraint(FixSymmetry(system))
-
-    if lattice_opt:
-        system = UnitCellFilter(system)
     
     traj_name = f"{seed_name}.traj"
     log_name = f"{seed_name}.log"
@@ -64,6 +61,8 @@ def ase_dftbp_optimise(
     with SocketIOCalculator(log=sys.stdout, unixsocket=unix_socket) as calc:
         Popen([dftbp_command], shell=True)
         system.set_calculator(calc)
+        if lattice_opt:
+            system = UnitCellFilter(system)
         if optimiser == "BFGS":
             from ase.optimize import BFGS
             opt = BFGS(system, trajectory=traj_name, logfile=log_name)
