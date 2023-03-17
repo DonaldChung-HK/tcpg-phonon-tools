@@ -83,11 +83,12 @@ def ase_dftbp_optimise(
             opt = MDMin(system, trajectory=traj_name, logfile=log_name)
         else:
             raise OptimiserNotIncludedException(f"{optimiser} is not a recognised optimiser")
+        
         opt.run(fmax=f_max)
 
     forces = system.get_forces()
     energy = system.get_potential_energy()
-    write(f'{seed_name}_end.gen', system, format='gen')
+    system.write(f'{seed_name}_end.gen', format='gen')
     print("Final Force", forces)
     print("Final Energy", energy)
     return system
