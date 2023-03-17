@@ -62,25 +62,28 @@ def ase_dftbp_optimise(
         Popen([dftbp_command], shell=True)
         system.set_calculator(calc)
         if lattice_opt:
-            system = UnitCellFilter(system)
+            filtered = UnitCellFilter(system)
+        else:
+            filtered = system
+
         if optimiser == "BFGS":
             from ase.optimize import BFGS
-            opt = BFGS(system, trajectory=traj_name, logfile=log_name)
+            opt = BFGS(filtered, trajectory=traj_name, logfile=log_name)
         elif optimiser == "LBFGS":
             from ase.optimize import LBFGS
-            opt = LBFGS(system, trajectory=traj_name, logfile=log_name)
+            opt = LBFGS(filtered, trajectory=traj_name, logfile=log_name)
         elif optimiser == "LBFGSLineSearch":
             from ase.optimize import LBFGSLineSearch
-            opt = LBFGSLineSearch(system, trajectory=traj_name, logfile=log_name)
+            opt = LBFGSLineSearch(filtered, trajectory=traj_name, logfile=log_name)
         elif optimiser == "GPMin":
             from ase.optimize import GPMin
-            opt = GPMin(system, trajectory=traj_name, logfile=log_name)
+            opt = GPMin(filtered, trajectory=traj_name, logfile=log_name)
         elif optimiser == "FIRE":
             from ase.optimize import FIRE
-            opt = FIRE(system, trajectory=traj_name, logfile=log_name)
+            opt = FIRE(filtered, trajectory=traj_name, logfile=log_name)
         elif optimiser == "MDMin":
             from ase.optimize import MDMin
-            opt = MDMin(system, trajectory=traj_name, logfile=log_name)
+            opt = MDMin(filtered, trajectory=traj_name, logfile=log_name)
         else:
             raise OptimiserNotIncludedException(f"{optimiser} is not a recognised optimiser")
         
