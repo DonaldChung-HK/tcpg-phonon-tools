@@ -37,7 +37,7 @@ def phonopy_setup(
     pur_list = []
     for file in file_list:
         if file.name.startswith('supercell-'): # don't name anything else with supercell in the working folder
-            pur = re.search("[0-9]*", file.name)[-1] #hoping that no changing the filename structure usually the last set of zero paded number is the correct one
+            pur = ''.join(re.findall("[0-9]", file.name))
             if pur not in pur_list:
                 pur_list.append(pur)
                 pur_path = result_path / pur
