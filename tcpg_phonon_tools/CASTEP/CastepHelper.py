@@ -21,37 +21,23 @@ def run_castep_single_point_phonopy(
     on_gamma = True,
     directory = "CASTEP",
     label = "system",
-    param_keyword = {
-        "task":'SinglePoint',
-        "basis_precision":'precise',
-        "xc_functional":'PBE',
-        "sedc_scheme":'G06',
-        "finite_basis_corr":'AUTOMATIC',
-        "geom_force_tol": 1e-4,
-        "elec_force_tol": 1e-6,
-        "elec_energy_tol": 1e-7,
-        "geom_max_iter": 300,
-        "grid_scale":2.5,
-        "max_scf_cycles":300,
+    task = 'SinglePoint',
+    basis_precision = 'precise',
+    xc_functional = 'PBE',
+    sedc_scheme = 'G06',
+    finite_basis_corr = 'AUTOMATIC',
+    geom_force_tol = 1e-4,
+    elec_force_tol = 1e-6,
+    elec_energy_tol = 1e-9,
+    geom_max_iter = 300,
+    max_scf_cycles = 300,
+    write_cell_structure = True,
+    additional_param_keyword = {
     },
-    cell_keyword = {},
+    additional_cell_keyword = {},
     ):
     """wrapper for single point usually using phonopy
     use 'export CASTEP_COMMAND = "mpirun castep.mpi "' tp set the castep command
-    param_keyword = {
-        "task":'SinglePoint',
-        "basis_precision":'precise',
-        "xc_functional":'PBE',
-        "sedc_scheme":'G06',
-        "finite_basis_corr":'AUTOMATIC',
-        "geom_force_tol": 1e-4,
-        "elec_force_tol": 1e-6,
-        "elec_energy_tol": 1e-7,
-        "geom_max_iter": 300,
-        "grid_scale":2.5,
-        "max_scf_cycles":300,
-    }
-    cell_keyword = {}
     Args:
         system (ase.Atoms): Atom system to use
         k_pts (tuple, optional): MP kpoints . Defaults to (2,2,2).
@@ -65,6 +51,27 @@ def run_castep_single_point_phonopy(
     # geom_modulus_est = 2000 to cheat the optimizer into smalller steps
     # cutoff_energy = int to have a fixed cutoff energy for basis set
     # sedc_apply = False to not apply sedc PBESOL is not compatible with SEDC since the cell is too small
+    default_param = {
+        "task": task,
+        "basis_precision": basis_precision,
+        "xc_functional": xc_functional,
+        "finite_basis_corr": finite_basis_corr,
+        "geom_force_tol": geom_force_tol,
+        "elec_force_tol": elec_force_tol,
+        "elec_energy_tol": elec_energy_tol,
+        "geom_max_iter": geom_max_iter,
+        "max_scf_cycles": max_scf_cycles,
+        "write_cell_structure": write_cell_structure
+    }
+    if sedc_scheme != None:
+        default_param['sedc_apply'] = True
+        default_param['sedc_scheme'] = sedc_scheme
+    else:
+        default_param['sedc_apply'] = False
+    
+    param_keyword = default_param | additional_param_keyword
+
+    cell_keyword = additional_cell_keyword
 
     result = run_castep(
         system = system,
@@ -83,37 +90,23 @@ def run_castep_opt(
     on_gamma = True,
     directory = "CASTEP",
     label = "system",
-    param_keyword = {
-        "task":'GeometryOptimization',
-        "basis_precision":'precise',
-        "xc_functional":'PBE',
-        "sedc_scheme":'G06',
-        "finite_basis_corr":'AUTOMATIC',
-        "geom_force_tol": 1e-4,
-        "elec_force_tol": 1e-6,
-        "elec_energy_tol": 1e-9,
-        "geom_max_iter": 300,
-        "grid_scale":2.5,
-        "max_scf_cycles":300,
+    task = 'GeometryOptimization',
+    basis_precision = 'precise',
+    xc_functional = 'PBE',
+    sedc_scheme = 'G06',
+    finite_basis_corr = 'AUTOMATIC',
+    geom_force_tol = 1e-4,
+    elec_force_tol = 1e-6,
+    elec_energy_tol = 1e-7,
+    geom_max_iter = 300,
+    max_scf_cycles = 300,
+    write_cell_structure = True,
+    additional_param_keyword = {
     },
-    cell_keyword = {},
+    additional_cell_keyword = {},
     ):
     """wrapper for geometry optimisation just a wrapper for CASTEP.castep_helper.run_castep() to remember the defaults for geometry optimisation
     use 'export CASTEP_COMMAND = "mpirun castep.mpi "' tp set the castep command
-    param_keyword = {
-        "task":'GeometryOptimization',
-        "basis_precision":'precise',
-        "xc_functional":'PBE',
-        "sedc_scheme":'G06',
-        "finite_basis_corr":'AUTOMATIC',
-        "geom_force_tol": 1e-4,
-        "elec_force_tol": 1e-6,
-        "elec_energy_tol": 1e-7,
-        "geom_max_iter": 300,
-        "grid_scale":2.5,
-        "max_scf_cycles":300,
-    }
-    cell_keyword = {}
     Args:
         system (ase.Atoms): Atom system to use
         k_pts (tuple, optional): MP kpoints . Defaults to (2,2,2).
@@ -127,6 +120,27 @@ def run_castep_opt(
     # geom_modulus_est = 2000 to cheat the optimizer into smalller steps
     # cutoff_energy = int to have a fixed cutoff energy for basis set
     # sedc_apply = False to not apply sedc PBESOL is not compatible with SEDC since the cell is too small
+    default_param = {
+        "task": task,
+        "basis_precision": basis_precision,
+        "xc_functional": xc_functional,
+        "finite_basis_corr": finite_basis_corr,
+        "geom_force_tol": geom_force_tol,
+        "elec_force_tol": elec_force_tol,
+        "elec_energy_tol": elec_energy_tol,
+        "geom_max_iter": geom_max_iter,
+        "max_scf_cycles": max_scf_cycles,
+        "write_cell_structure": write_cell_structure
+    }
+    if sedc_scheme != None:
+        default_param['sedc_apply'] = True
+        default_param['sedc_scheme'] = sedc_scheme
+    else:
+        default_param['sedc_apply'] = False
+    
+    param_keyword = default_param | additional_param_keyword
+
+    cell_keyword = additional_cell_keyword
 
     result = run_castep(
         system = system,
@@ -145,25 +159,25 @@ def run_castep_pho(
     on_gamma = True,
     directory = "CASTEP",
     label = "system",
-    param_keyword = {
-        "task":'PHONON',
-        "basis_precision":'precise',
-        "xc_functional":'PBE',
-        "sedc_scheme":'G06',
-        "finite_basis_corr":'AUTOMATIC',
-        "geom_force_tol": 1e-4,
-        "elec_force_tol": 1e-6,
-        "elec_energy_tol": 1e-9,
-        "geom_max_iter": 300,
-        "grid_scale":2.5,
-        "max_scf_cycles":300,
-        "elec_eigenvalue_tol":1e-9,
-        "phonon_method":"FINITEDISPLACEMENT",
-        "phonon_fine_method":"INTERPOLATE",
+    task = 'PHONON',
+    basis_precision = 'precise',
+    xc_functional = 'PBE',
+    sedc_scheme = 'G06',
+    finite_basis_corr = 'AUTOMATIC',
+    geom_force_tol = 1e-4,
+    elec_force_tol = 1e-6,
+    elec_energy_tol = 1e-9,
+    geom_max_iter = 300,
+    max_scf_cycles = 300,
+    write_cell_structure = True,
+    elec_eigenvalue_tol = 1e-9,
+    phonon_method = 'FINITEDISPLACEMENT',
+    phonon_fine_method = 'INTERPOLATE',
+    phonon_kpoint_mp_grid = (2,2,2),
+    phonon_kpoint_mp_offset = True,
+    additional_param_keyword = {
     },
-    cell_keyword = {
-        "phonon_kpoint_mp_grid":"2 2 2",
-        "phonon_kpoint_mp_offset":"1/4 1/4 1/4",
+    additional_cell_keyword = {
     },
     phonon_supercell_matrix = [
         [2, 0, 0],
@@ -173,23 +187,6 @@ def run_castep_pho(
     ):
     """wrapper for phonon just a wrapper for CASTEP.castep_helper.run_castep() to remember the defaults for phonon and add the supercell matrix to .cell before running
     use 'export CASTEP_COMMAND = "mpirun castep.mpi "' tp set the castep command
-    param_keyword = {
-        "task":'GeometryOptimization',
-        "basis_precision":'precise',
-        "xc_functional":'PBE',
-        "sedc_scheme":'G06',
-        "finite_basis_corr":'AUTOMATIC',
-        "geom_force_tol": 1e-4,
-        "elec_force_tol": 1e-6,
-        "elec_energy_tol": 1e-7,
-        "geom_max_iter": 300,
-        "grid_scale":2.5,
-        "max_scf_cycles":300,
-    }
-    cell_keyword = {
-        "phonon_kpoint_mp_grid":"2 2 2", usually this is 1/2 of the 
-        "phonon_kpoint_mp_offset":"1/4 1/4 1/4", formula to set offset is 0.5/phonon_kpoint for on gamma operation
-    } 
     Exceptions:
         RuntimeError: raised if dry run fails
 
@@ -203,6 +200,42 @@ def run_castep_pho(
         cell_keyword (dict, optional): dict of ovcastep keyword for .cell note that the kpoint is set already using calc.set_kpoints.
         phonon_supercell_matrix(3x3 list array or None): 3x3 matrix of supercell it will append the cell file since ase castep can't write it if None castep will use 2x2x2
     """
+    default_param = {
+        "task": task,
+        "basis_precision": basis_precision,
+        "xc_functional": xc_functional,
+        "finite_basis_corr": finite_basis_corr,
+        "geom_force_tol": geom_force_tol,
+        "elec_force_tol": elec_force_tol,
+        "elec_energy_tol": elec_energy_tol,
+        "geom_max_iter": geom_max_iter,
+        "max_scf_cycles": max_scf_cycles,
+        "write_cell_structure": write_cell_structure,
+        "elec_eigenvalue_tol": elec_eigenvalue_tol,
+        "phonon_method": phonon_method,
+        "phonon_fine_method": phonon_fine_method,
+    }
+    if sedc_scheme != None:
+        default_param['sedc_apply'] = True
+        default_param['sedc_scheme'] = sedc_scheme
+    else:
+        default_param['sedc_apply'] = False
+    
+    param_keyword = default_param | additional_param_keyword
+
+    #set offset if phonon_kpoint_mp_offset == True to include gamma false = not include gamma tuple to set manually
+    if isinstance(phonon_kpoint_mp_offset, bool) and phonon_kpoint_mp_offset == True:
+        phonon_kpoint_mp_offset = ((1/ (2 * pt)) for pt in  phonon_kpoint_mp_grid)
+    elif isinstance(phonon_kpoint_mp_offset, bool) and phonon_kpoint_mp_offset == False:
+        phonon_kpoint_mp_offset = (0, 0, 0)
+
+    " ".join((str(item) for item in phonon_kpoint_mp_offset))
+    default_cell = {
+        "phonon_kpoint_mp_grid": " ".join((str(item) for item in phonon_kpoint_mp_grid)),
+        "phonon_kpoint_mp_offset": " ".join((str(item) for item in phonon_kpoint_mp_offset)),
+    }
+    cell_keyword = default_cell | additional_cell_keyword
+    #just setup not run
     system = run_castep(
         system = system,
         k_pts = k_pts,
@@ -318,27 +351,31 @@ def run_castep(
             run_name = str(label)
             potential_energy = system.get_potential_energy()
             # for some reason the atoms are not modified inplace so need to read from cell
-            optimised = read(f"{directory}/{label}-out.cell")
-            # stop the run if fail to converge
-            if is_fail_in_waring(system.calc._warnings):          
+            try:
+                optimised = read(f"{directory}/{label}-out.cell")
+                # stop the run if fail to converge
+                if is_fail_in_waring(system.calc._warnings):          
+                    holder_calc = SinglePointCalculator(
+                        optimised, 
+                        energy=potential_energy
+                    )
+                    optimised.calc = holder_calc
+                    return optimised 
+                print(f"{run_name} is completed at {datetime.now()} with potential energy of : {potential_energy}")
+
+                # castep calculator is not great at remembering stuff since there are 2 files to read so it get bugged sometimes
+                # beware that if not converged in limit this will cause the simulation to run multiples
                 holder_calc = SinglePointCalculator(
                     optimised, 
-                    energy=potential_energy
-                )
+                    energy=potential_energy, 
+                    forces=system.get_forces(), 
+                    stress=system.get_stress(),
+                    charges=system.get_charges())
                 optimised.calc = holder_calc
-                return optimised 
-            print(f"{run_name} is completed at {datetime.now()} with potential energy of : {potential_energy}")
-
-            # castep calculator is not great at remembering stuff since there are 2 files to read so it get bugged sometimes
-            # beware that if not converged in limit this will cause the simulation to run multiples
-            holder_calc = SinglePointCalculator(
-                optimised, 
-                energy=potential_energy, 
-                forces=system.get_forces(), 
-                stress=system.get_stress(),
-                charges=system.get_charges())
-            optimised.calc = holder_calc
-            return optimised
+                return optimised
+            except:
+                print(f"Problem reading {directory}/{label}-out.cell either due to single point calculation or WR")
+                return None
         else:
             print("Found error in input")
             print(calc._error)
