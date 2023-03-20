@@ -16,7 +16,7 @@ def phonopy_setup(
     label = "foo",
     wall_time = "04:00:00",
     nodes = 2,
-    path_to_venv = "path/to/venv/activate",
+    path_to_venv = "~/python_env/AMD/bin/activate",
     CASTEP_command = "mpirun castep.mpi "
 ):
     if not isinstance(working_dir, Path):
@@ -69,7 +69,11 @@ def phonopy_setup(
                 f"--time={wall_time}",
                 f"--array={start}-{end}"
             ],
-            modules=[],
+            modules=[
+                "AMDmodules",
+                "Python/3.10.4-GCCcore-11.3.0",
+                "CASTEP/21.1.1-iomkl-2021a"
+            ],
             set_ups=[
                 f"source {path_to_venv}",
                 "CASENUM=`printf %03d $SLURM_ARRAY_TASK_ID`"
