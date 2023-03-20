@@ -42,7 +42,7 @@ def phonopy_setup(
             pur = ''.join(re.findall("[0-9]", file.name))
             if pur not in pur_list:
                 pur_list.append(pur)
-                pur_path = result_path / pur
+                pur_path = run_path / pur
                 pur_path.mkdir(exist_ok=True)
                 file.rename(storage_path / f"{pur}.cell")
 
