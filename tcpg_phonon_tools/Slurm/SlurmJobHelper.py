@@ -31,7 +31,7 @@ def gen_slurm(
 
         for slurm_param in slurm_param_list:
             param_line = f"#SBATCH {slurm_param}\n"
-            f.write(param_line)
+            f.write(param_line + "\n")
 
         #modules lines
         f.write("module purge\n")
