@@ -1,0 +1,32 @@
+Geometry = GenFormat {
+    # geometry input file
+    <<< "$struct_in_file_name"
+}
+Hamiltonian = xTB {
+    Method = "$xtb_method"
+    MaxSCCIterations = $max_scc_cycles
+    SCCTolerance = $scc_tol
+    # Example uses a fairly large supercell, so not many k-points are included
+    KPointsAndWeights = SupercellFolding {
+        $kpt_a 0 0
+        0 $kpt_b 0
+        0 0 $kpt_c
+        $offset_a $offset_b $offset_c
+    }
+    Solver = $hamiltonian_solver { } 
+}
+
+Options = {
+    # Required options for storing data needed by phonopy
+    WriteResultsTag = Yes
+}
+
+
+Analysis = {
+    # required option for phonopy
+    CalculateForces = Yes
+}
+
+Parallel {
+    UseOmpThreads = Yes
+}

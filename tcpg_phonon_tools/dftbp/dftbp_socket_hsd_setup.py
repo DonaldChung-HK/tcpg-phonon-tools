@@ -1,10 +1,7 @@
-from importlib.resources import files, as_file
+from importlib.resources import files
 from string import Template
 import argparse
 import tcpg_phonon_tools.templates.dftbp.dftbp_socket_calc as dftbp_socket_calc_template
-
-
-
 
 def gen_dftb_in(
         k_pts = [2,2,2],
