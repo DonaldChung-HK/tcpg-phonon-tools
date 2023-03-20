@@ -30,7 +30,7 @@ def gen_slurm(
         f.write(hashbang + "\n")
 
         for slurm_param in slurm_param_list:
-            param_line = f"#SBATCH {slurm_param}\n"
+            param_line = f"#SBATCH {slurm_param}"
             f.write(param_line + "\n")
 
         #modules lines
