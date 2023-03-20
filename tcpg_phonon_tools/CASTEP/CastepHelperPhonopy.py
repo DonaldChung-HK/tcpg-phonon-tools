@@ -78,7 +78,7 @@ def phonopy_setup(
             ],
             set_ups=[
                 f"source {path_to_venv}",
-                "CASENUM=`printf %03d $SLURM_ARRAY_TASK_ID`"
+                "CASENUM=`printf %03d $SLURM_ARRAY_TASK_ID`",
                 f"export CASTEP_COMMAND='{CASTEP_command}'"
             ],
             commands=[
