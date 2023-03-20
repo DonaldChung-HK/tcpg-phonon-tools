@@ -93,11 +93,7 @@ def main():
         Setup running for CASTEP phonopy run.
         """)
     parser.add_argument('input_file', type=str,
-                        help="Path to crystal structure to optimise")
-    parser.add_argument('-f', '--opt_in_file_name', 
-                        type=str,
-                        default=None,
-                        help="""Input file for phonopy""")
+                        help="Input file for phonopy")
     parser.add_argument('-k', '--k_pts',
                         type=int,
                         nargs=3,
@@ -131,7 +127,7 @@ def main():
     args = parser.parse_args()
     phonopy_setup(
         working_dir = ".",
-        opt_in_file_name = args.opt_in_file_name,
+        opt_in_file_name = args.input_file,
         k_pts = args.k_pts,
         supercell = args.supercell,
         not_gen_slurm = False,
