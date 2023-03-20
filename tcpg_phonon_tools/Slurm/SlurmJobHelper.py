@@ -27,27 +27,27 @@ def gen_slurm(
 
     with open(output, "x") as f:
         #hashbang
-        f.write(hashbang)
+        f.write(hashbang + "\n")
 
         for slurm_param in slurm_param_list:
-            param_line = f"#SBATCH {slurm_param}"
+            param_line = f"#SBATCH {slurm_param}\n"
             f.write(param_line)
 
         #modules lines
-        f.write("module purge")
+        f.write("module purge\n")
 
         for module in modules:
-            module_line = f"module load {module}"
+            module_line = f"module load {module}\n"
             f.write(module_line)
 
-        f.write("module list")
+        f.write("module list\n")
 
         #non_module environment setup
         for set_up in set_ups:
-            f.write(set_up)
+            f.write(set_up + "\n")
 
         #commands
         for command in commands:
-            f.write(command)
+            f.write(command + "\n")
 
 
