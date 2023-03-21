@@ -26,16 +26,16 @@ def exec_dftbp(pur, system_name, current_dir, result_dir, OMP_NUM_THREADS, OMP_S
 def main():
     ts = time()
     ##Param
-    system_name = $label
+    system_name = "$label"
     woring_dir = Path(".")
     thread = $thread
     result_dir = Path("result")
-    dftb_command = $dftb_command
+    dftb_command = "$dftb_command"
     OMP_NUM_THREADS = $OMP_NUM_THREADS
-    OMP_STACKSIZE = $OMP_STACKSIZE
+    OMP_STACKSIZE = "$OMP_STACKSIZE"
     pur_list = $pur_list
-    supercell = $supercell
-    opt_in_file_name = $opt_in_file_name
+    supercell = "$supercell"
+    opt_in_file_name = "$opt_in_file_name"
     ###
     path_process = run(['echo $PATH'], shell=True, capture_output=True)
     path = path_process.stdout
