@@ -16,7 +16,7 @@ def exec_dftbp(pur, system_name, current_dir, result_dir, OMP_NUM_THREADS, OMP_S
     logger.info(f'Starting {system_name}_{pur}')
     directory = current_dir / "run" / str(pur)
 
-    run([f'{dftb_command} > {system_name}_{pur}.out'], cwd=directory, env={"OMP_NUM_THREADS": str(OMP_NUM_THREADS), "PATH": path, "OMP_STACKSIZE": OMP_STACKSIZE}, shell=True)
+    run([f'ulimit -s unlimited; {dftb_command} > {system_name}_{pur}.out'], cwd=directory, env={"OMP_NUM_THREADS": str(OMP_NUM_THREADS), "PATH": path, "OMP_STACKSIZE": OMP_STACKSIZE}, shell=True)
 
     logger.info(f'Completed {system_name}_{pur}')
     shutil.copyfile(directory / "results.tag", result_dir / f"{system_name}_{pur}.tag")

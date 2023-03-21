@@ -143,4 +143,5 @@ def cli_mantid_abins():
         BinWidthInWavenumber = args.BinWidthInWavenumber,
         retrieve_items = args.retrieve_items,
         out_path = args.out_path,
+        qpt_cutoff = args.qpt_cutoff,
     )
