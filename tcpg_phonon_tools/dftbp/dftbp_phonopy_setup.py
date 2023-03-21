@@ -308,7 +308,6 @@ def main():
     gen_dftbp_phonopy_job(
         opt_in_file_name = args.input_file,
         k_pts = args.k_pts,
-        socket_name = args.socket_name,
         max_steps = args.max_steps,
         xtb_method = args.xtb_method,
         max_scc_cycles = args.max_scc_cycles,
