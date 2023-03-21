@@ -152,7 +152,7 @@ def gen_run_py_phonopy(
 
     run_py_template = Template(run_py_template_file)
 
-    run_py_result = run_py_template.substitute(variables)
+    run_py_result = run_py_template.safe_substitute(variables)
 
     with open(out_file, "x") as f:
         f.write(run_py_result)
