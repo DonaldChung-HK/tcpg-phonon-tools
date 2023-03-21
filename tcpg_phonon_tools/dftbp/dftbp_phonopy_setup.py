@@ -119,7 +119,7 @@ def apply_dftb_in_phonopy_template(
     with open(template_file, "r") as f:
         dftb_template = Template(f.read())
     
-    result = dftb_template.safe_substitute({"struct_in_file_name": file_name})
+    result = dftb_template.substitute({"struct_in_file_name": file_name})
 
     with open(run_path / pur) as f:
         f.write(result)
@@ -210,7 +210,7 @@ def gen_dftb_in_phonopy_template(
 
     dftb_in_hsd_template = Template(dftb_in_hsd_template_file)
 
-    dftb_in_hsd_result = dftb_in_hsd_template.substitute(variables)
+    dftb_in_hsd_result = dftb_in_hsd_template.safe_substitute(variables)
 
     with open(out_file, "x") as f:
         f.write(dftb_in_hsd_result)
