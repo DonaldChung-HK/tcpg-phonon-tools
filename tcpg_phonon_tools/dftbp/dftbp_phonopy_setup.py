@@ -101,6 +101,8 @@ def gen_dftbp_phonopy_job(
         OMP_NUM_THREADS = OMP_NUM_THREADS,
         OMP_STACKSIZE = OMP_STACKSIZE,
         pur_list = pur_list,
+        opt_in_file_name = opt_in_file_name,
+        supercell= supercell_str
     )
 
     
@@ -130,7 +132,9 @@ def gen_run_py_phonopy(
     OMP_NUM_THREADS = 8,
     OMP_STACKSIZE = "8G",
     pur_list = [],
-    out_file = "run.py"
+    out_file = "run.py",
+    supercell = "2 2 2",
+    opt_in_file_name = "foo.gen"
 ):
 
     variables = {
@@ -139,7 +143,9 @@ def gen_run_py_phonopy(
         "dftb_command": dftb_command,
         "OMP_NUM_THREADS": OMP_NUM_THREADS,
         "OMP_STACKSIZE": OMP_STACKSIZE,
-        "pur_list": str(pur_list)
+        "pur_list": str(pur_list),
+        "supercell": supercell,
+        "opt_in_file_name": opt_in_file_name,
     }
 
     run_py_template_file = files(phonon_template).joinpath('run.py.template').read_text()
@@ -165,7 +171,6 @@ def gen_dftb_in_phonopy_template(
         out_file = "dftb_in.hsd.template"
     ):
     """generate a dftbp input from template. this will provide the basic file for a parameter file to run the socket calculator
-
     Args:
         k_pts (list(int), optional): kpoints for mp with offset automatically calculated. Defaults to [2,2,2].
         socket_name (str, optional): name of the socket file should match the socket name when runnint the calculation. Defaults to "dftbplus".

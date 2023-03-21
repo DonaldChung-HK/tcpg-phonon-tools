@@ -34,6 +34,8 @@ def main():
     OMP_NUM_THREADS = $OMP_NUM_THREADS
     OMP_STACKSIZE = $OMP_STACKSIZE
     pur_list = $pur_list
+    supercell = $supercell
+    opt_in_file_name = $opt_in_file_name
     ###
     path_process = run(['echo $PATH'], shell=True, capture_output=True)
     path = path_process.stdout
@@ -49,6 +51,13 @@ def main():
     )
     with Pool(thread) as p:
         p.map(partial_pur, pur_list)
+    try:
+        shutil.copyfile(woring_dir / "phonopy_disp.yaml", result_dir / "phonopy_disp.yaml")
+        shutil.copyfile(opt_in_file_name, result_dir / "geo_end.gen")
+        run([f"phonopy --dftb+ --include-all -f {system_name}_*.tag"], cwd=result_dir, env={"PATH": path}, shell=True)
+        run(f"phonopy --dftb+ --dim='{supercell}' --dos --include-all -c geo_end.gen --mesh='20 20 20'", cwd=result_dir, env={"PATH": path}, shell=True)
+    except:
+        print("error in post processing")
     logging.info('Took %s', time() - ts)
 
 if __name__ == '__main__':
