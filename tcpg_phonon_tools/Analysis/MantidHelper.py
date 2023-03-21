@@ -9,6 +9,7 @@ import argparse
 def run_abins(
     label = "FOO",
     input_file = "phonopy.yaml",
+    qpt_cutoff = 15.0,
     AbInitioProgram='FORCECONSTANTS',
     SumContributions=True,
     ScaleByCrossSection='Total',
@@ -22,6 +23,10 @@ def run_abins(
     ):
     if not isinstance(out_path, Path):
         out_path = Path(out_path)
+    
+    import abins.parameters
+
+    abins.parameters.sampling['force_constants']['qpt_cutoff'] = qpt_cutoff
     
     Abins(
         VibrationalOrPhononFile=input_file, 
@@ -116,6 +121,12 @@ def cli_mantid_abins():
         type=str,
         default='.',
         help="path to output the files")
+    parser.add_argument(
+        '-q',
+        '--qpt_cutoff',
+        type=float,
+        default=15.0,
+        help="qpoint cutoff")
 
     
     args = parser.parse_args()
