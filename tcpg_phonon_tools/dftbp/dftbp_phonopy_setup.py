@@ -29,7 +29,7 @@ def gen_dftbp_phonopy_job(
     hsd_template_copy = True
 ):
     supercell_str = ' '.join([str(x) for x in supercell])
-    run(['phonopy', '--dftb+', f'--dim="{supercell_str}"', '-d', '-c', opt_in_file_name])
+    run(['phonopy', '--dftb+', f'--dim={supercell_str}', '-d', '-c', opt_in_file_name])
     file_list = list(woring_dir.iterdir())
 
     run_path = woring_dir / "run"
