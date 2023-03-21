@@ -121,7 +121,7 @@ def apply_dftb_in_phonopy_template(
     
     result = dftb_template.substitute({"struct_in_file_name": file_name})
 
-    with open(run_path / pur / "dftb_in.hsd") as f:
+    with open(run_path / pur / "dftb_in.hsd", "w") as f:
         f.write(result)
     
 
