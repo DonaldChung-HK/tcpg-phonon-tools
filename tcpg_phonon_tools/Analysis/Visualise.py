@@ -56,6 +56,8 @@ def emd_and_chart(
     else:
         plt.show()
 
+    return emd_calc
+
 def emd_and_chart_cli():
     parser = argparse.ArgumentParser(
         description="""
