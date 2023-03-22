@@ -17,7 +17,7 @@ def run_abins(
     Autoconvolution = True,
     Setting = 'All detectors (TOSCA)',
     BinWidthInWavenumber = 1,
-    retrieve_items = ["total"],
+    retrieve_items = ["Total"],
     out_path = Path("."),
     **kwarg
     ):
