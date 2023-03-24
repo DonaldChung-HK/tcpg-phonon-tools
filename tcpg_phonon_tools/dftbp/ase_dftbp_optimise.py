@@ -18,7 +18,7 @@ def ase_dftbp_optimise(
         input_file = './geo_start.gen',
         input_format = None,
         unix_socket = 'dftbplus',
-        dftbp_command = 'OMP_NUM_THREADS=16,1 OMP_STACKSIZE=8G OMP_MAX_ACTIVE_LEVELS=1 dftb+',
+        dftbp_command = 'ulimit -s unlimited; OMP_NUM_THREADS=16,1 OMP_STACKSIZE=8G OMP_MAX_ACTIVE_LEVELS=1 dftb+',
         optimiser = "BFGS",
         f_max = 1.00E-08,
         fix_sym = True,
@@ -26,6 +26,11 @@ def ase_dftbp_optimise(
         seed_name = "opt"
     ):
     """run a dftbp optimisation using the socket calculator you must use
+        command guide:
+            'ulimit -s unlimited;: again dftb+ is very wasteful with stack memory
+            OMP_NUM_THREADS=16,1: allows dynamic allocation of cores
+            OMP_STACKSIZE=8G: xTB run out of stack with larger system
+            export OMP_MAX_ACTIVE_LEVELS=1: deactivate nested OMP construct
 
     Args:
         input_file (str, optional): the path to input file. Defaults to './geo_start.gen'.
