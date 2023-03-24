@@ -89,7 +89,7 @@ def gen_dftbp_phonopy_job(
             "CASENUM=`printf %03d $SLURM_ARRAY_TASK_ID`",
         ],
         commands=[
-            f"{dftb_command} > {label}_{pur}.out"
+            f"{dftb_command} > {label}_$CASENUM.out"
         ]
     )
 
