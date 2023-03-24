@@ -12,11 +12,11 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(level
 
 logger = logging.getLogger(__name__)
 
-def exec_dftbp(pur, system_name, current_dir, result_dir, OMP_NUM_THREADS, OMP_STACKSIZE, dftb_command, path):
+def exec_dftbp(pur, system_name, current_dir, result_dir, dftb_command, path):
     logger.info(f'Starting {system_name}_{pur}')
     directory = current_dir / "run" / str(pur)
 
-    run([f'ulimit -s unlimited; {dftb_command} > {system_name}_{pur}.out'], cwd=directory, env={"OMP_NUM_THREADS": str(OMP_NUM_THREADS), "PATH": path, "OMP_STACKSIZE": OMP_STACKSIZE}, shell=True)
+    run([f'ulimit -s unlimited; {dftb_command} > {system_name}_{pur}.out'], cwd=directory, env={"PATH": path}, shell=True)
 
     logger.info(f'Completed {system_name}_{pur}')
     shutil.copyfile(directory / "results.tag", result_dir / f"{system_name}_{pur}.tag")
@@ -31,8 +31,6 @@ def main():
     thread = $thread
     result_dir = Path("result")
     dftb_command = "$dftb_command"
-    OMP_NUM_THREADS = $OMP_NUM_THREADS
-    OMP_STACKSIZE = "$OMP_STACKSIZE"
     pur_list = $pur_list
     supercell = "$supercell"
     opt_in_file_name = "$opt_in_file_name"
@@ -45,8 +43,6 @@ def main():
         current_dir = woring_dir, 
         result_dir = result_dir, 
         path = path,
-        OMP_NUM_THREADS = OMP_NUM_THREADS, 
-        OMP_STACKSIZE = OMP_STACKSIZE, 
         dftb_command = dftb_command, 
     )
     with Pool(thread) as p:

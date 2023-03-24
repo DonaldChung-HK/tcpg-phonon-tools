@@ -11,6 +11,7 @@ import argparse
 def gen_dftbp_phonopy_job(
     opt_in_file_name,
     woring_dir = Path("."),
+    dftb_command = "ulimit -s unlimited; OMP_NUM_THREADS=16,1 OMP_STACKSIZE=8G OMP_MAX_ACTIVE_LEVELS=1 dftb+",
     supercell = (2,2,2),
     nodes = 1,
     wall_time = "00:30:00",
@@ -23,9 +24,6 @@ def gen_dftbp_phonopy_job(
     hamiltonian_solver = "RelativelyRobust",
     path_to_venv = "~/python_env/AMD/bin/activate",
     python_thread = 2,
-    mpi_thread = 1,
-    OMP_NUM_THREADS = 8,
-    OMP_STACKSIZE = "8G",
     hsd_template_copy = True
 ):
     supercell_str = ' '.join([str(x) for x in supercell])
@@ -91,18 +89,17 @@ def gen_dftbp_phonopy_job(
             "CASENUM=`printf %03d $SLURM_ARRAY_TASK_ID`",
         ],
         commands=[
-            f"OMP_STACKSIZE={OMP_STACKSIZE} OMP_NUM_THREADS={OMP_NUM_THREADS} mpirun -np {mpi_thread} dftb+ > {label}_{pur}.out"
+            f"{dftb_command} > {label}_{pur}.out"
         ]
     )
 
     gen_run_py_phonopy(
         label=label,
         thread=python_thread,
-        OMP_NUM_THREADS = OMP_NUM_THREADS,
-        OMP_STACKSIZE = OMP_STACKSIZE,
         pur_list = pur_list,
         opt_in_file_name = opt_in_file_name,
-        supercell= supercell_str
+        supercell= supercell_str,
+        dftb_command=dftb_command
     )
 
     
@@ -129,8 +126,6 @@ def gen_run_py_phonopy(
     label = "foo",
     thread = 2,
     dftb_command = "dftb+",
-    OMP_NUM_THREADS = 8,
-    OMP_STACKSIZE = "8G",
     pur_list = [],
     out_file = "run.py",
     supercell = "2 2 2",
@@ -141,8 +136,6 @@ def gen_run_py_phonopy(
         "label": label,
         "thread": thread,
         "dftb_command": dftb_command,
-        "OMP_NUM_THREADS": OMP_NUM_THREADS,
-        "OMP_STACKSIZE": OMP_STACKSIZE,
         "pur_list": str(pur_list),
         "supercell": supercell,
         "opt_in_file_name": opt_in_file_name,
@@ -292,18 +285,10 @@ def main():
         type=int, 
         default=2, help="python multiprocess thread for python runner")
     parser.add_argument(
-        '--mpi_thread',
-        type=int, 
-        default=2, help="mpi thread for dftb+ run")
-    parser.add_argument(
-        '--OMP_NUM_THREADS',
-        type=int, 
-        default=8, help="OpenMP thread for dftb+ run")
-    parser.add_argument(
-        '--OMP_STACKSIZE',
+        '--dftb_command',
         type=str, 
-        default="8G", help="OpenMP Stacksize thread for dftb+ run")
-
+        default="ulimit -s unlimited; OMP_NUM_THREADS=16,1 OMP_STACKSIZE=8G OMP_MAX_ACTIVE_LEVELS=1 dftb+", 
+        help="dftb+ command")
     args = parser.parse_args()
     gen_dftbp_phonopy_job(
         opt_in_file_name = args.input_file,
@@ -319,9 +304,6 @@ def main():
         label = args.label,
         path_to_venv = args.path_to_venv,
         python_thread = args.python_thread,
-        mpi_thread = args.mpi_thread,
-        OMP_NUM_THREADS = args.OMP_NUM_THREADS,
-        OMP_STACKSIZE = args.OMP_STACKSIZE
-
+        dftb_command = args.dftb_command
     )
         

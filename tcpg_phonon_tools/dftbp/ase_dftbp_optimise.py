@@ -18,7 +18,7 @@ def ase_dftbp_optimise(
         input_file = './geo_start.gen',
         input_format = None,
         unix_socket = 'dftbplus',
-        dftbp_command = 'dftb+',
+        dftbp_command = 'OMP_NUM_THREADS=16,1 OMP_STACKSIZE=8G OMP_MAX_ACTIVE_LEVELS=1 dftb+',
         optimiser = "BFGS",
         f_max = 1.00E-08,
         fix_sym = True,
