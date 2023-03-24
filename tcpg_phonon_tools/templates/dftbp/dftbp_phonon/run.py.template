@@ -16,7 +16,7 @@ def exec_dftbp(pur, system_name, current_dir, result_dir, dftb_command, path):
     logger.info(f'Starting {system_name}_{pur}')
     directory = current_dir / "run" / str(pur)
 
-    run([f'ulimit -s unlimited; {dftb_command} > {system_name}_{pur}.out'], cwd=directory, env={"PATH": path}, shell=True)
+    run([f'{dftb_command} > {system_name}_{pur}.out'], cwd=directory, env={"PATH": path}, shell=True)
 
     logger.info(f'Completed {system_name}_{pur}')
     shutil.copyfile(directory / "results.tag", result_dir / f"{system_name}_{pur}.tag")
