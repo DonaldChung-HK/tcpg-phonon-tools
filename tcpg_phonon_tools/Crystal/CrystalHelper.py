@@ -14,7 +14,7 @@ def opt_crystal_setup(
     energy_tol_neg_exp = 7,
     k_pts = (2,2,2),
     nodes = 2,
-    wall_time = "04:00:00",
+    wall_time = "10:00:00",
 ):
     subprocess.run(["cif2cell", "-p", "crystal09", "-o", f"{label}.d12.temp", input_file])
     with open(f"{label}.d12.temp", "r") as f:
