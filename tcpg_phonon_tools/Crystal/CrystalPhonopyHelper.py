@@ -20,6 +20,7 @@ def phonopy_crystal_setup(
     nodes = 2,
     wall_time = "10:00:00",
     crystal_command = "mpirun Pcrystal",
+    path_to_venv = "~/python_env/AMD/bin/activate",
     copy_input = True,
 ):
     #loading template
@@ -84,15 +85,18 @@ def phonopy_crystal_setup(
             ],
             modules=[
                 "AMDmodules",
-                "Python/3.10.4-GCCcore-11.3.0",
-                "CASTEP/21.1.1-iomkl-2021a"
+                "crystal23",
             ],
             set_ups=[
                 f"source {path_to_venv}",
                 "CASENUM=`printf %03d $SLURM_ARRAY_TASK_ID`",
-                f"export CASTEP_COMMAND='{CASTEP_command}'"
             ],
             commands=[
-                f"python run.py -f ./storage/$CASENUM.cell -k {k_pts[0]} {k_pts[1]} {k_pts[2]} -p ./run/$CASENUM -l {label}_$CASENUM"
+                "cd ./run/$CASENUM",
+                "cp fort.34 fort.34.bak", #crystal will overrite fort.34
+                f"{crystal_command} 2> >(tee {label}_$CASENUM.out)",
+                f"cp {label}_$CASENUM.out ../../result/",
+                'find . -name "diis*" -delete',
+                'find . -name "fort*" -not -name "fort.34*" -delete'
             ]
         )
