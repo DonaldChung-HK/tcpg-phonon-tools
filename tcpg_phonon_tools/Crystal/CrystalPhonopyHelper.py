@@ -26,12 +26,14 @@ def phonopy_crystal_setup(
 ):
     #loading template
     crystal_INPUT_template_file = files(phonon_templates).joinpath('INPUT.phonopy.template').read_text()
-    with open(working_dir / "INPUT.template", "w") as f:
-        f.write(crystal_INPUT_template_file)
     crystal_INPUT_template = Template(crystal_INPUT_template_file)
+    
     if not isinstance(working_dir, Path):
         working_dir = Path(str(working_dir))
     
+    with open(working_dir / "INPUT.template", "w") as f:
+        f.write(crystal_INPUT_template_file)
+
     supercell = ' '.join([str(x) for x in supercell])
     run(['phonopy', '--crystal', f'--dim={supercell}', '-d', '-c', opt_in_file_name])
     file_list = list(working_dir.iterdir())
