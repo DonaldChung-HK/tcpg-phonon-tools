@@ -78,7 +78,7 @@ def phonopy_crystal_setup(
     pur_list.sort(key=int) #sorting it by number   
     #verification step to confirm that the displacements id are contineous
     start = 1
-    end = len(pur_list) + 1
+    end = len(pur_list)
     test_range = list(range(start, end))
     for i in range(len(pur_list)):
         if test_range[i] != int(pur_list[i]):
