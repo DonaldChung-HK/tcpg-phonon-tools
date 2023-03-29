@@ -47,7 +47,7 @@ def phonopy_crystal_setup(
     result_path.mkdir(exist_ok=True)
     pur_list = []
     for file in file_list:
-        if file.name.startswith('supercell-'): # don't name anything else with supercell in the working folder
+        if file.name.endswith('.ext'): # don't name anything else with .ext in the working folder
             pur = ''.join(re.findall("[0-9]", file.name))
             if pur not in pur_list:
                 pur_list.append(pur)
@@ -126,7 +126,7 @@ def phonopy_setup_cli():
                         type=str,
                         help="""command to run Crystal """)
     parser.add_argument('-t', '--energy_tol_neg_exp', 
-                        default=7,
+                        default=9,
                         type=int,
                         help="""criteria for the optimiser as negative exponential integer""")
     parser.add_argument(
@@ -174,7 +174,7 @@ def phonopy_setup_cli():
         nodes = args.nodes,
         wall_time = args.wall_time,
         crystal_command = args.crystal_command,       
-        working_dir = ".",
+        working_dir = Path("."),
         opt_in_file_name = args.input_file,
         supercell = args.supercell,
         path_to_venv = args.path_to_venv,
