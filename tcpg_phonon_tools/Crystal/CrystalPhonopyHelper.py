@@ -23,11 +23,14 @@ def phonopy_crystal_setup(
     crystal_command = "mpirun Pcrystal",
     path_to_venv = "~/python_env/AMD/bin/activate",
     not_copy_input = False,
+    use_symmetry = True,
 ):
     #loading template
     crystal_INPUT_template_file = files(phonon_templates).joinpath('INPUT.phonopy.template').read_text()
     crystal_INPUT_template = Template(crystal_INPUT_template_file)
-    
+    if use_symmetry:
+        with open("CRY_SYM", "w") as f:
+            f.write("")
     if not isinstance(working_dir, Path):
         working_dir = Path(str(working_dir))
     
@@ -154,6 +157,9 @@ def phonopy_setup_cli():
     parser.add_argument('--not_copy_input', 
                         action="store_true",
                         help="""not copy the INPUT file template to add arguments""")
+    parser.add_argument('--use_symmetry', 
+                        action="store_true",
+                        help="""use symmetry beware if you have a CRYS_SYM file in the working dir it will use sym anyway""")
     parser.add_argument('--path_to_venv', 
                         type=str,
                         default="~/python_env/AMD/bin/activate",
@@ -181,4 +187,5 @@ def phonopy_setup_cli():
         supercell = args.supercell,
         path_to_venv = args.path_to_venv,
         not_copy_input = args.not_copy_input,
+        use_symmetry=args.use_symmetry,
     )
