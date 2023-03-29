@@ -152,7 +152,7 @@ def phonopy_setup_cli():
                         default="foo",
                         help="""wall time of string""")
     parser.add_argument('--not_copy_input', 
-                        action="store_false",
+                        action="store_true",
                         help="""not copy the INPUT file template to add arguments""")
     parser.add_argument('--path_to_venv', 
                         type=str,
@@ -165,7 +165,6 @@ def phonopy_setup_cli():
         default=[2,2,2],
         help="diagonal supercell tuple")
     args = parser.parse_args()
-
     
 
     phonopy_crystal_setup(
