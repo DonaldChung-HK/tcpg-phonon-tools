@@ -21,7 +21,7 @@ def phonopy_crystal_setup(
     wall_time = "10:00:00",
     crystal_command = "mpirun Pcrystal",
     path_to_venv = "~/python_env/AMD/bin/activate",
-    copy_input = True,
+    not_copy_input = False,
 ):
     #loading template
     crystal_INPUT_template_file = files(phonon_templates).joinpath('INPUT.phonopy.template').read_text()
@@ -49,7 +49,7 @@ def phonopy_crystal_setup(
                 pur_path = run_path / pur
                 pur_path.mkdir(exist_ok=True)
                 file.rename(pur_path / "fort.34")
-                if copy_input:
+                if not not_copy_input:
                     sub_dict = {
                         "job_name": f"{label}_{pur}",
                         "basis_set": basis_set,
@@ -100,3 +100,76 @@ def phonopy_crystal_setup(
                 'find . -name "fort*" -not -name "fort.34*" -delete'
             ]
         )
+
+def phonopy_setup_cli():
+    parser = argparse.ArgumentParser(
+        description="""Setup phonopy for CRYSTAL23""")
+    parser.add_argument('input_file', type=str,
+                        help="Path to crystal structure optimised")
+    parser.add_argument('-b', '--basis_set', 
+                        type=str,
+                        default="POB-TZVP",
+                        help="""Crystal Keyword Basis Set""")
+    parser.add_argument('-d', '--dft_mode', 
+                        type=str,
+                        default="PBE-D3",
+                        help="""CRYSTAL keyword DFT mode""")
+    parser.add_argument('-c', '--crystal_command', 
+                        default="mpirun Pcrystal",
+                        type=str,
+                        help="""command to run Crystal """)
+    parser.add_argument('-t', '--energy_tol_neg_exp', 
+                        default=7,
+                        type=int,
+                        help="""criteria for the optimiser as negative exponential integer""")
+    parser.add_argument(
+        '-k',
+        '--k_pts',
+        type=int,
+        nargs=3,
+        default=[2,2,2],
+        help="Monkhorst-Pack k-points tuple as list of int")
+    parser.add_argument('-n', '--nodes', 
+                        type=int,
+                        default=2,
+                        help="""number of nodes""")
+    parser.add_argument('-w', '--wall_time', 
+                        type=str,
+                        default="10:00:00",
+                        help="""wall time  string""")
+    parser.add_argument('-l', '--label', 
+                        type=str,
+                        default="foo",
+                        help="""wall time of string""")
+    parser.add_argument('--not_copy_input', 
+                        action="store_false",
+                        help="""not copy the INPUT file template to add arguments""")
+    parser.add_argument('--path_to_venv', 
+                        type=str,
+                        default="~/python_env/AMD/bin/activate",
+                        help="""path to venv activate script""")
+    parser.add_argument(
+        '--supercell',
+        type=int,
+        nargs=3,
+        default=[2,2,2],
+        help="diagonal supercell tuple")
+    args = parser.parse_args()
+
+    
+
+    phonopy_crystal_setup(
+        label = args.label,
+        basis_set = args.basis_set,
+        dft_mode = args.dft_mode,
+        energy_tol_neg_exp = args.energy_tol_neg_exp,
+        k_pts = args.k_pts,
+        nodes = args.nodes,
+        wall_time = args.wall_time,
+        crystal_command = args.crystal_command,       
+        working_dir = ".",
+        opt_in_file_name = args.input_file,
+        supercell = args.supercell,
+        path_to_venv = args.path_to_venv,
+        not_copy_input = args.not_copy_input,
+    )

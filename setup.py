@@ -38,7 +38,8 @@ def main():
                 'emd-chart = tcpg_phonon_tools.Analysis.Visualise:emd_and_chart_cli',
                 'castep-phonopy-setup = tcpg_phonon_tools.CASTEP.CastepHelperPhonopy:main',
                 'dftbp-phonopy-setup = tcpg_phonon_tools.dftbp.dftbp_phonopy_setup:main',
-                'crystal-opt-setup = tcpg_phonon_tools.Crystal.CrystalHelper:opt_setup_cli'
+                'crystal-opt-setup = tcpg_phonon_tools.Crystal.CrystalHelper:opt_setup_cli',
+                'crystal-phonopy-setup = tcpg_phonon_tools.Crystal.CrystalPhonopyHelper:phonopy_setup_cli',
                 ]
             },
         include_package_data=True,

@@ -109,7 +109,7 @@ def opt_setup_cli():
     parser.add_argument('-l', '--label', 
                         type=str,
                         default="foo",
-                        help="""wall time of string""")
+                        help="""name label""")
     args = parser.parse_args()
 
     opt_crystal_setup(
