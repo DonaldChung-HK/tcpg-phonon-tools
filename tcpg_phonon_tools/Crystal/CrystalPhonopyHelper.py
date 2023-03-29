@@ -7,6 +7,7 @@ from importlib.resources import files
 import tcpg_phonon_tools.templates.CRYSTAL.phonopy as phonon_templates
 import argparse
 from string import Template
+import shutil
 def phonopy_crystal_setup(
     working_dir,
     opt_in_file_name,
@@ -50,6 +51,7 @@ def phonopy_crystal_setup(
                 pur_list.append(pur)
                 pur_path = run_path / pur
                 pur_path.mkdir(exist_ok=True)
+                shutil.copyfile(file, storage_path / file.name)
                 file.rename(pur_path / "fort.34")
                 if not not_copy_input:
                     sub_dict = {
