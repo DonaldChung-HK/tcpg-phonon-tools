@@ -66,6 +66,8 @@ def phonopy_crystal_setup(
                     current_INPUT = crystal_INPUT_template.substitute(sub_dict)
                     with open(pur_path / "INPUT", "w") as f:
                         f.write(current_INPUT)
+        elif file.name.endswith('.d12'): # this is not usefull but will keep for record
+            file.rename(storage_path / file.name)
 
 
 
