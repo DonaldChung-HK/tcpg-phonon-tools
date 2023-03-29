@@ -47,27 +47,28 @@ def phonopy_crystal_setup(
     result_path.mkdir(exist_ok=True)
     pur_list = []
     for file in file_list:
-        if file.name.endswith('.ext'): # don't name anything else with .ext in the working folder
-            pur = ''.join(re.findall("[0-9]", file.name))
-            if pur not in pur_list:
-                pur_list.append(pur)
-                pur_path = run_path / pur
-                pur_path.mkdir(exist_ok=True)
-                shutil.copyfile(file, storage_path / file.name)
-                file.rename(pur_path / "fort.34")
-                if not not_copy_input:
-                    sub_dict = {
-                        "job_name": f"{label}_{pur}",
-                        "basis_set": basis_set,
-                        "dft_mode": dft_mode,
-                        "kpoint_string": ' '.join(list(str(x) for x in k_pts)),
-                        "energy_tol_neg_exp": energy_tol_neg_exp,
-                    }
-                    current_INPUT = crystal_INPUT_template.substitute(sub_dict)
-                    with open(pur_path / "INPUT", "w") as f:
-                        f.write(current_INPUT)
-        elif file.name.endswith('.d12'): # this is not usefull but will keep for record
-            file.rename(storage_path / file.name)
+        if file.name.startswith('supercell-'):
+            if file.name.endswith('.ext'): # don't name anything else with .ext in the working folder
+                pur = ''.join(re.findall("[0-9]", file.name))
+                if pur not in pur_list:
+                    pur_list.append(pur)
+                    pur_path = run_path / pur
+                    pur_path.mkdir(exist_ok=True)
+                    shutil.copyfile(file, storage_path / file.name)
+                    file.rename(pur_path / "fort.34")
+                    if not not_copy_input:
+                        sub_dict = {
+                            "job_name": f"{label}_{pur}",
+                            "basis_set": basis_set,
+                            "dft_mode": dft_mode,
+                            "kpoint_string": ' '.join(list(str(x) for x in k_pts)),
+                            "energy_tol_neg_exp": energy_tol_neg_exp,
+                        }
+                        current_INPUT = crystal_INPUT_template.substitute(sub_dict)
+                        with open(pur_path / "INPUT", "w") as f:
+                            f.write(current_INPUT)
+            elif file.name.endswith('.d12'): # this is not usefull but will keep for record
+                file.rename(storage_path / file.name)
 
 
 
