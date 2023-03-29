@@ -65,7 +65,7 @@ def gen_dftbp_phonopy_job(
     pur_list.sort(key=int)
     start = 1
     end = len(pur_list)
-    test_range = list(range(start, end))
+    test_range = list(range(start, end + 1))
     for i in range(len(pur_list)):
         if test_range[i] != int(pur_list[i]):
             warnings.warn("the displacement list might not be contineous")    
