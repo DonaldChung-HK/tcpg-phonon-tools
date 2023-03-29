@@ -1,0 +1,14 @@
+$job_name
+EXTERNAL
+BASISSET
+$basis_set
+DFT
+$dft_mode
+END
+SHRINK
+0 0
+$kpoint_string
+TOLDEE
+$energy_tol_neg_exp
+GRADCAL
+END

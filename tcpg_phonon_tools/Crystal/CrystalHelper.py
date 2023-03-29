@@ -16,7 +16,8 @@ def opt_crystal_setup(
     k_pts = (2,2,2),
     nodes = 2,
     wall_time = "10:00:00",
-    crystal_command = "mpirun Pcrystal"
+    crystal_command = "mpirun Pcrystal",
+    path_to_venv = "~/python_env/AMD/bin/activate",
 ):
     subprocess.run(["cif2cell", "-p", "crystal09", "-o", f"{label}.d12.temp", input_file])
     with open(f"{label}.d12.temp", "r") as f:
@@ -57,12 +58,14 @@ def opt_crystal_setup(
             "AMDmodules",
             "crystal23",
         ],
-        set_ups = [
+        set_ups=[
+            f"source {path_to_venv}",
         ],
         commands=[
             f"{crystal_command} 2> >(tee {label}_opt.out)",
             'find . -name "diis*" -delete',
-            'find . -name "fort*" -not -name "fort.34*" -delete'
+            'find . -name "fort*" -not -name "fort.34*" -delete',
+            "#uncomment below for setting up phonopy",
         ],
     )
 
