@@ -30,7 +30,7 @@ def phonopy_crystal_setup(
         working_dir = Path(str(working_dir))
     
     supercell = ' '.join([str(x) for x in supercell])
-    run(['phonopy', '--castep', f'--dim={supercell}', '-d', '-c', opt_in_file_name])
+    run(['phonopy', '--crystal', f'--dim={supercell}', '-d', '-c', opt_in_file_name])
     file_list = list(working_dir.iterdir())
     run_path = working_dir / "run"
     run_path.mkdir(exist_ok=True)
