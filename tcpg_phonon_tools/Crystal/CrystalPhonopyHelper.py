@@ -25,6 +25,8 @@ def phonopy_crystal_setup(
 ):
     #loading template
     crystal_INPUT_template_file = files(phonon_templates).joinpath('INPUT.phonopy.template').read_text()
+    with open(working_dir / "INPUT.template", "w") as f:
+        f.write(crystal_INPUT_template_file)
     crystal_INPUT_template = Template(crystal_INPUT_template_file)
     if not isinstance(working_dir, Path):
         working_dir = Path(str(working_dir))
@@ -86,6 +88,7 @@ def phonopy_crystal_setup(
             modules=[
                 "AMDmodules",
                 "crystal23",
+                "Python/3.10.4-GCCcore-11.3.0",
             ],
             set_ups=[
                 f"source {path_to_venv}",
