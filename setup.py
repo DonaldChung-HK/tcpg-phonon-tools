@@ -36,6 +36,7 @@ def main():
                 'ase-dftbp-optimise = tcpg_phonon_tools.dftbp.ase_dftbp_optimise:main',
                 'abins-mantid-runner = tcpg_phonon_tools.Analysis.MantidHelper:cli_mantid_abins',
                 'emd-chart = tcpg_phonon_tools.Analysis.Visualise:emd_and_chart_cli',
+                'emd-chart-multi = tcpg_phonon_tools.Analysis.Visualise:emd_and_chart_multi_cli',
                 'castep-phonopy-setup = tcpg_phonon_tools.CASTEP.CastepHelperPhonopy:main',
                 'dftbp-phonopy-setup = tcpg_phonon_tools.dftbp.dftbp_phonopy_setup:main',
                 'crystal-opt-setup = tcpg_phonon_tools.Crystal.CrystalHelper:opt_setup_cli',

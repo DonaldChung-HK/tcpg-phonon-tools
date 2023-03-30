@@ -57,6 +57,7 @@ def opt_crystal_setup(
         modules=[
             "AMDmodules",
             "crystal23",
+            "Python/3.10.4-GCCcore-11.3.0"
         ],
         set_ups=[
             f"source {path_to_venv}",
@@ -65,7 +66,12 @@ def opt_crystal_setup(
             f"{crystal_command} 2> >(tee {label}_opt.out)",
             'find . -name "diis*" -delete',
             'find . -name "fort*" -not -name "fort.34*" -delete',
-            "#uncomment below for setting up phonopy",
+            "#uncomment below for setting up phonopy and editing the supercell and kpoint",
+            '#mkdir pho',
+            f'#cp {label}_opt.out pho/',
+            '#cd pho',
+            f'#crystal-phonopy-setup -k 2 2 2 --supercell 2 2 2 -l {label} -t 9 -w "06:00:00" -n 2 -b {basis_set} -d {dft_mode} --use_symmetry {label}_opt.out',
+            '#sbatch run.slurm',
         ],
     )
 
