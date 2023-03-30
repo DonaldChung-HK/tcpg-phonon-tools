@@ -39,7 +39,7 @@ def emd_and_chart(
 
     y_top = max(max(ref_y_inter), max(calculated_y)) * 1.05
 
-    emd_calc = wasserstein_distance(ref_y_inter, calculated_y) * (cut_off - min_energy) #the default weight is normalised to 1 so multiply it by the range will have a more readable number
+    emd_calc = wasserstein_distance(ref_y_inter, calculated_y) * (max(calculated_x) - min(calculated_x)) #the default weight is normalised to 1 so multiply it by the range will have a more readable number
     emd_string = f"EMD: {emd_calc}"
     print(emd_string)
 
@@ -97,7 +97,7 @@ def emd_and_chart_multi(
 
         ref_y_inter = f(calculated_x) #assuming you put stuff with the same BinWidth
 
-        emd_calc = wasserstein_distance(ref_y_inter, calculated_y) * (cut_off - min_energy) #the default weight is normalised to 1 so multiply it by the range will have a more readable number
+        emd_calc = wasserstein_distance(ref_y_inter, calculated_y) * (max(calculated_x) - min(calculated_x)) #the default weight is normalised to 1 so multiply it by the range will have a more readable number
         emd_string = f"{calculated_path.name} EMD: {emd_calc}"
         axes.plot(calculated_x, calculated_y, label=calculated_path.name)
         print(emd_string)
