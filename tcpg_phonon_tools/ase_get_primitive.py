@@ -36,7 +36,7 @@ def get_primirive(
                 pbc=True)
     
 
-    lattice_param = result.get_cell_lengths_and_angles()
+    lattice_param = result.cell.cellpar()
     print(lattice_param)
     print("Result:")
     print("--------------")
