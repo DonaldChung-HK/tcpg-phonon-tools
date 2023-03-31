@@ -169,7 +169,7 @@ def emd_and_chart_cli():
         calculated_path = args.calculated_input_file,
         ref_path = args.ref_input_file, 
         cut_off = args.cut_off,
-        min_energy=args.minmin_energy,
+        min_energy=args.min_energy,
         out_path = args.out_path        
     )
 
