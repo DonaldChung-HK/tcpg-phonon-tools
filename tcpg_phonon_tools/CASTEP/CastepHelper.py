@@ -395,7 +395,7 @@ def castep_slurm_opt_setup(
         label = "foo",
         nodes = 2,
         nodes_supercell = 2,
-        wall_time_string = "00:12:15",
+        wall_time_string = "12:15:00",
         timeout_hour = 12,
         castep_command = "mpirun castep.mpi",
         path_to_venv = "~/python_env/AMD/bin/activate",
