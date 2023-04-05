@@ -44,9 +44,6 @@ if __name__ == '__main__':
             k_pts = args.k_pts,
             directory = args.castep_run_path,
             label = args.label,
-            additional_cell_keyword={
-                "SYMMETRY_GENERATE": True
-            }
         )
     except:
         warnings.warn("There is error in the run")

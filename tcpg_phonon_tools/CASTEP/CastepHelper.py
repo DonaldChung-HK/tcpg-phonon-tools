@@ -30,7 +30,7 @@ def run_castep_single_point_phonopy(
     finite_basis_corr = 'AUTOMATIC',
     geom_force_tol = 1e-4,
     elec_force_tol = 1e-6,
-    elec_energy_tol = 1e-9,
+    elec_energy_tol = 1e-8,
     geom_max_iter = 300,
     max_scf_cycles = 300,
     write_cell_structure = True,
@@ -103,6 +103,7 @@ def run_castep_opt(
     geom_max_iter = 300,
     max_scf_cycles = 300,
     write_cell_structure = True,
+    continuation = "default",
     additional_param_keyword = {
     },
     additional_cell_keyword = {},
@@ -133,7 +134,8 @@ def run_castep_opt(
         "elec_energy_tol": elec_energy_tol,
         "geom_max_iter": geom_max_iter,
         "max_scf_cycles": max_scf_cycles,
-        "write_cell_structure": write_cell_structure
+        "write_cell_structure": write_cell_structure,
+        "continuation": continuation,
     }
     if sedc_scheme != None:
         default_param['sedc_apply'] = True
@@ -395,7 +397,8 @@ def castep_slurm_opt_setup(
         nodes_supercell = 2,
         wall_time_string = "00:12:15",
         timeout_hour = 12,
-        castep_command = "mpirun castep.mpi"
+        castep_command = "mpirun castep.mpi",
+        path_to_venv = "~/python_env/AMD/bin/activate",
     ):
     run_castep_opt(
         system,
@@ -403,7 +406,8 @@ def castep_slurm_opt_setup(
         on_gamma = True,
         not_run=True,
         additional_cell_keyword={
-            "SYMMETRY_GENERATE": True
+            "SYMMETRY_GENERATE": True,
+            "SNAP_TO_SYMMETRY": True,
         },
         label = f"{label}_opt"
     )
@@ -429,25 +433,26 @@ def castep_slurm_opt_setup(
         ],
         set_ups=[
             f"export CASTEP_COMMAND='{castep_command}'",
+            f"source {path_to_venv}",
         ],
         commands=[
-            f"timeout {timeout_hour}h mpirun castep.mpi {label}_opt",
+            f"timeout {timeout_hour}h {castep_command} {label}_opt",
             "if [[ $? -eq 124 ]]; then",
             r"    timestamp=$(date +%Y%m%d_%H%M%S)",
-            f"    mv {label}_opt.cell {label}_opt_$timestamp_init_old.cell",
-            f"    mv {label}_opt-out.cell {label}_opt.cell",
-            f"    mv {label}_opt.castep {label}_opt_$timestamp_old.castep",
-            f"    rm {label}_opt.castep_bin"
-            f"    mv {label}_opt.geom {label}_opt_$timestamp_old.geom",
+            f'    mv {label}_opt.cell {label}_opt_"$timestamp"_init_old.cell',
+            f'    mv {label}_opt-out.cell {label}_opt.cell',
+            f'    mv {label}_opt.castep {label}_opt_"$timestamp"_old.castep',
+            f"    rm {label}_opt.castep_bin",
+            f'    mv {label}_opt.geom {label}_opt_"$timestamp"_old.geom',
             '    find . -name "*.check" -delete',
             '    find . -name "*.check_bak" -delete',
             '    find . -name "*.usp" -delete',
             '    sbatch run.slurm',
             'else',
             "    mkdir pho",
-            f"    cp {label}_opt-out.cell pho/"
+            f"    cp {label}_opt-out.cell pho/",
             "    cd pho",
-            f'    castep-phonopy-setup -k {supercell_kpt[0]} {supercell_kpt[1]} {supercell_kpt[2]} -s {supercell[0]} {supercell[1]} {supercell[2]} -l {label}_pho -t 00:12:00 -n {nodes_supercell} -c {castep_command}',
+            f'    castep-phonopy-setup -k {supercell_kpt[0]} {supercell_kpt[1]} {supercell_kpt[2]} -s {supercell[0]} {supercell[1]} {supercell[2]} -l {label}_pho -t 00:12:00 -n {nodes_supercell} -c "{castep_command}" {label}_opt-out.cell',
             "    sbatch run.slurm",
             "    cd -",
             '    find . -name "*.check" -delete',
