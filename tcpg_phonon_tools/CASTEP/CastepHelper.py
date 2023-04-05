@@ -452,7 +452,7 @@ def castep_slurm_opt_setup(
             "    mkdir pho",
             f"    cp {label}_opt-out.cell pho/",
             "    cd pho",
-            f'    castep-phonopy-setup -k {supercell_kpt[0]} {supercell_kpt[1]} {supercell_kpt[2]} -s {supercell[0]} {supercell[1]} {supercell[2]} -l {label}_pho -t 00:12:00 -n {nodes_supercell} -c "{castep_command}" {label}_opt-out.cell',
+            f'    castep-phonopy-setup -k {supercell_kpt[0]} {supercell_kpt[1]} {supercell_kpt[2]} -s {supercell[0]} {supercell[1]} {supercell[2]} -l {label}_pho -t 20:00:00 -n {nodes_supercell} -c "{castep_command}" {label}_opt-out.cell',
             "    sbatch run.slurm",
             "    cd -",
             '    find . -name "*.check" -delete',
