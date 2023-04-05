@@ -10,12 +10,16 @@ import argparse
 
 from pathlib import Path
 
+import sys
+
 def emd_and_chart(
         calculated_path = "foo_abins.csv",
         ref_path = "foo_ref.csv", 
         min_energy = 0.0, 
         cut_off = 4000.0,
-        out_path = "fig.png"
+        out_path = "fig.png",
+        do_cumulative_emd = True,
+        cumulative_emd_data = None,
     ):
     ref = pd.read_csv(ref_path)
     ref = ref[ref[ref.columns[0]] <= cut_off]
@@ -42,12 +46,33 @@ def emd_and_chart(
     emd_calc = wasserstein_distance(ref_y_inter, calculated_y) * (max(calculated_x) - min(calculated_x)) #the default weight is normalised to 1 so multiply it by the range will have a more readable number
     emd_string = f"EMD: {emd_calc}"
     print(emd_string)
+    cumulative_emd = []
+    if do_cumulative_emd:
+        print("Doing cumulative EMD:")
+        for i in range(1, len(calculated_x) + 1):
+            sys.stdout.write(f"{i/(len(calculated_x) + 1)*100:.2f}%")
+            sys.stdout.write('\r')
+            ref_y_inter_current = ref_y_inter[0:i]
+            calculated_y_current = calculated_y[0:i]
+            calculated_x_current = calculated_x[0:i]
+            emd_current = wasserstein_distance(ref_y_inter_current, calculated_y_current) * (max(calculated_x_current) - min(calculated_x_current))
+            cumulative_emd.append([calculated_x[i-1], emd_current])
+        cumulative_emd_df = pd.DataFrame(cumulative_emd, columns=['x', 'CumEMD'])
+    elif cumulative_emd_data != None:
+        cumulative_emd_df = pd.read_csv(cumulative_emd_data)
 
     print("Drawing Fig")
-    
-    fig, axes = plt.subplots(edgecolor='#ffffff')
+
+    if cumulative_emd_data != None or do_cumulative_emd:
+        fig, axes = plt.subplots(edgecolor='#ffffff')
+        axes2 = axes.twinx()
+        axes2.plot(cumulative_emd_df.iloc[:,0], cumulative_emd_df.iloc[:,1],color="brown", label='Cumulative_emd')
+        axes2.set_ylabel('Cumulative EMD')
+    else:
+        fig, axes = plt.subplots(edgecolor='#ffffff')
     axes.plot(calculated_x, ref_y_inter, color='#1f77b4', label='Ref')
     axes.plot(calculated_x, calculated_y,color='#ff7f0e', label='Calc')
+    
     axes.set_title(f'Ref VS Calculated | {emd_string}')
     axes.set_xlabel('Energy transfer ($cm^{-1}$)')
     axes.set_ylabel('S / Arbitrary Units ($cm^{-1}$)$^{-1}$')
@@ -57,6 +82,8 @@ def emd_and_chart(
 
     if out_path != None:
         plt.savefig(out_path)
+        if do_cumulative_emd:
+            cumulative_emd_df.to_csv(f"{out_path}_cumulative_emd.csv", index=False)
     else:
         plt.show()
 
@@ -163,6 +190,17 @@ def emd_and_chart_cli():
         default=None,
         help="out_put the figure to file. If None it will just show it"
     )
+    parser.add_argument(
+        '--do_cumulative_emd',
+        action="store_true",
+        help="calculate and show cumulative emd in seondary y axis"
+    )
+    parser.add_argument(
+        '--cumulative_emd_data',
+        type=str,
+        default=None,
+        help="use calculated cumulative_emd data"
+    )
     args = parser.parse_args()
 
     emd_and_chart(
@@ -170,7 +208,9 @@ def emd_and_chart_cli():
         ref_path = args.ref_input_file, 
         cut_off = args.cut_off,
         min_energy=args.min_energy,
-        out_path = args.out_path        
+        out_path = args.out_path,
+        do_cumulative_emd=args.do_cumulative_emd,
+        cumulative_emd_data=args.cumulative_emd_data,     
     )
 
 def emd_and_chart_multi_cli():
