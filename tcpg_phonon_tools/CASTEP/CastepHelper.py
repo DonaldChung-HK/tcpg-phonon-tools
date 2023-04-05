@@ -5,8 +5,10 @@ import ase.io.castep
 from ase.io import read
 import warnings
 from ase.calculators.singlepoint import SinglePointCalculator
-
-
+from tcpg_phonon_tools.Slurm.SlurmJobHelper import gen_slurm
+import shutil
+from pathlib import Path
+import numpy as np
 def is_fail_in_waring(_warnings):
     for warning in _warnings:
         if "failed" in warning:
@@ -104,6 +106,7 @@ def run_castep_opt(
     additional_param_keyword = {
     },
     additional_cell_keyword = {},
+    not_run=False
     ):
     """wrapper for geometry optimisation just a wrapper for CASTEP.castep_helper.run_castep() to remember the defaults for geometry optimisation
     use 'export CASTEP_COMMAND = "mpirun castep.mpi "' tp set the castep command
@@ -150,8 +153,10 @@ def run_castep_opt(
         label = label,
         param_keyword = param_keyword,
         cell_keyword = cell_keyword,
+        not_run=not_run
     )
-    return result
+    if not not_run:
+        return result
 
 def run_castep_pho(
     system,
@@ -183,7 +188,7 @@ def run_castep_pho(
         [2, 0, 0],
         [0, 2, 0],
         [0, 0, 2],
-    ]
+    ],
     ):
     """wrapper for phonon just a wrapper for CASTEP.castep_helper.run_castep() to remember the defaults for phonon and add the supercell matrix to .cell before running
     use 'export CASTEP_COMMAND = "mpirun castep.mpi "' tp set the castep command
@@ -381,3 +386,74 @@ def run_castep(
             print(calc._error)
     
             
+def castep_slurm_opt_setup(
+        system,
+        k_pts = (2,2,2),
+        supercell = (2,2,2),
+        label = "foo",
+        nodes = 2,
+        nodes_supercell = 2,
+        wall_time_string = "00:12:15",
+        timeout_hour = 12,
+        castep_command = "mpirun castep.mpi"
+    ):
+    run_castep_opt(
+        system,
+        k_pts = k_pts,
+        on_gamma = True,
+        not_run=True,
+        additional_cell_keyword={
+            "SYMMETRY_GENERATE": True
+        },
+        label = f"{label}_opt"
+    )
+    cell_file = Path(f"CASTEP/{label}_opt.cell")
+    cell_file.rename(f"{label}_opt.cell")
+    param_file = Path(f"CASTEP/{label}_opt.param")
+    param_file.rename(f"{label}_opt.param")
+    shutil.rmtree("CASTEP")
+    supercell_kpt = np.array(k_pts) // np.array(supercell)
+    gen_slurm(
+        slurm_param_list = [
+            "-p scarf",
+            f"--job-name {label}_opt",
+            f"--nodes={nodes}",
+            "--exclusive",
+            "-C amd",
+            f"--time={wall_time_string}"
+        ],
+        modules = [
+            "AMDmodules",
+            "Python/3.10.4-GCCcore-11.3.0",
+            "CASTEP/21.1.1-iomkl-2021a"
+        ],
+        set_ups=[
+            f"export CASTEP_COMMAND='{castep_command}'",
+        ],
+        commands=[
+            f"timeout {timeout_hour}h mpirun castep.mpi {label}_opt",
+            "if [[ $? -eq 124 ]]; then",
+            r"    timestamp=$(date +%Y%m%d_%H%M%S)",
+            f"    mv {label}_opt.cell {label}_opt_$timestamp_init_old.cell",
+            f"    mv {label}_opt-out.cell {label}_opt.cell",
+            f"    mv {label}_opt.castep {label}_opt_$timestamp_old.castep",
+            f"    rm {label}_opt.castep_bin"
+            f"    mv {label}_opt.geom {label}_opt_$timestamp_old.geom",
+            '    find . -name "*.check" -delete',
+            '    find . -name "*.check_bak" -delete',
+            '    find . -name "*.usp" -delete',
+            '    sbatch run.slurm',
+            'else',
+            "    mkdir pho",
+            f"    cp {label}_opt-out.cell pho/"
+            "    cd pho",
+            f'    castep-phonopy-setup -k {supercell_kpt[0]} {supercell_kpt[1]} {supercell_kpt[2]} -s {supercell[0]} {supercell[1]} {supercell[2]} -l {label}_pho -t 00:12:00 -n {nodes_supercell} -c {castep_command}',
+            "    sbatch run.slurm",
+            "    cd -",
+            '    find . -name "*.check" -delete',
+            '    find . -name "*.check_bak" -delete',
+            'fi',
+        ]
+
+    )
+    
