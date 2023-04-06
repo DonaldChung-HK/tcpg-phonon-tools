@@ -449,11 +449,12 @@ def castep_slurm_opt_setup(
             f"    cp {label}_opt-out.cell pho/",
             "    cd pho",
             f'    castep-phonopy-setup -k {supercell_kpt[0]} {supercell_kpt[1]} {supercell_kpt[2]} -s {supercell[0]} {supercell[1]} {supercell[2]} -l {label}_pho -t {pur_wall_time_string} -n {nodes_supercell} -c "{castep_command}" {label}_opt-out.cell',
-            "    source init.sh",
             "    cd -",
             '    find . -name "*.check" -delete',
             '    find . -name "*.check_bak" -delete',
             '    find . -name "*.usp" -delete',
+            "    cd pho",
+            "    source init.sh",
             'fi',
         ]
 
