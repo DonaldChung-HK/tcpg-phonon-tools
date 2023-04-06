@@ -1,0 +1,57 @@
+from tcpg_phonon_tools.CASTEP.CastepHelper import run_castep_single_point_phonopy
+from ase.io import read
+import argparse
+import shutil
+from pathlib import Path
+import warnings
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(
+        description="helper to run a phonopy job")
+    parser.add_argument(
+        '-f',
+        '--input_file',
+        type=str,
+        default='FOO',
+        help="Input cell file")
+    parser.add_argument(
+        '-k',
+        '--k_pts',
+        type=int,
+        nargs=3,
+        default=[2,2,2],
+        help="Monkhorst-Pack k-points tuple as list of int will alos automatically compute whether an offset is needed")
+    
+    parser.add_argument(
+        '-p',
+        '--castep_run_path',
+        type=str,
+        default='FOO',
+        help="castep run path")
+    
+    parser.add_argument(
+        '-l',
+        '--label',
+        type=str,
+        default='FOO',
+        help="seed name of castep run")
+    
+    args = parser.parse_args()
+    input_system = read(args.input_file)
+    try:
+        system = run_castep_single_point_phonopy(
+            system = input_system,
+            k_pts = args.k_pts,
+            directory = args.castep_run_path,
+            label = args.label,
+            additional_param_keyword= {
+                "continuation" : "default"
+            }
+        )
+    except:
+        warnings.warn("There is error in the run")
+    
+    try:
+        shutil(Path(args.castep_run_path) / f"{args.label}.castep", Path("result") / f"{args.label}.castep")
+    except:
+        warnings.warn("Copy failed")

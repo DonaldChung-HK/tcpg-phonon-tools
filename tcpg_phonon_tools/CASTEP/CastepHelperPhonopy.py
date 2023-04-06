@@ -6,7 +6,9 @@ from tcpg_phonon_tools.Slurm.SlurmJobHelper import gen_slurm
 from importlib.resources import files
 import tcpg_phonon_tools.templates.CASTEP as python_script_template_path
 import argparse
-
+from tcpg_phonon_tools.CASTEP.CastepHelper import run_castep_single_point_phonopy
+from ase.io import read
+import shutil
 def phonopy_setup(
     working_dir,
     opt_in_file_name,
@@ -14,7 +16,7 @@ def phonopy_setup(
     supercell = (2,2,2),
     not_gen_slurm = False,
     label = "foo",
-    wall_time = "04:00:00",
+    wall_time = "23:15:00",
     nodes = 2,
     path_to_venv = "~/python_env/AMD/bin/activate",
     CASTEP_command = "mpirun castep.mpi "
@@ -44,7 +46,22 @@ def phonopy_setup(
                 pur_list.append(pur)
                 pur_path = run_path / pur
                 pur_path.mkdir(exist_ok=True)
-                file.rename(storage_path / f"{pur}.cell")
+                run_castep_single_point_phonopy(
+                    system=read(file),
+                    k_pts = k_pts,
+                    on_gamma = True,
+                    directory = pur_path,
+                    label = f"{label}_{pur}",
+                    not_run=True,
+                    additional_cell_keyword={
+                        "SYMMETRY_GENERATE": True,
+                    }
+                )
+                file.rename(storage_path / f"{label}_{pur}.cell")
+                shutil.copyfile(pur_path / f"{label}_{pur}.param", pur_path / f"{label}_{pur}.param.continuation")
+                with open(pur_path / f"{label}_{pur}.param.continuation", "a") as f:
+                    f.write("\ncontinuation : default")
+                
 
     pur_list.sort(key=int) #sorting it by number
     
@@ -55,10 +72,6 @@ def phonopy_setup(
     for i in range(len(pur_list)):
         if test_range[i] != int(pur_list[i]):
             warnings.warn("the displacement list might not be contineous")
-    #copy a script from template to folder for customisatin if needed
-    castep_python_script_template_file = files(python_script_template_path).joinpath('CastepPhononRunTemplate').read_text()
-    with open("run.py", "x") as f:
-        f.write(castep_python_script_template_file)
     #setup a slurm to run recurrsively by loading different supercell and running it with the accompanying files
     if not not_gen_slurm:
         gen_slurm(
@@ -69,7 +82,7 @@ def phonopy_setup(
                 "--exclusive",
                 "-C amd",
                 f"--time={wall_time}",
-                f"--array={start}-{end}"
+                # f"--array={start}-{end}"
             ],
             modules=[
                 "AMDmodules",
@@ -82,9 +95,56 @@ def phonopy_setup(
                 f"export CASTEP_COMMAND='{CASTEP_command}'"
             ],
             commands=[
-                f"python run.py -f ./storage/$CASENUM.cell -k {k_pts[0]} {k_pts[1]} {k_pts[2]} -p ./run/$CASENUM -l {label}_$CASENUM"
+                "cd ./run/$CASENUM",
+                f"timeout {wall_time.split(':')[0]}h {CASTEP_command} {label}_$CASENUM",
+                "if [[ $? -eq 124 ]]; then",
+                f'    cp {label}_$CASENUM.param.continuation {label}_$CASENUM.param',
+                '    cd -',
+                '    sbatch --array=$SLURM_ARRAY_TASK_ID run.slurm',
+                'else',
+                f"    cp {label}_$CASENUM.castep ../../result/",
+                '    find . -name "*.check" -delete',
+                '    find . -name "*.check_bak" -delete',
+                '    find . -name "*.usp" -delete',
+                'fi',                
             ]
         )
+        with open("init.sh", "w") as f:
+            f.write(f"#! /bin/bash -l\nsbatch --array={start}-{end} run.slurm")
+        # gen_slurm(
+        #     output=Path("run_cont.slurm"),
+        #     slurm_param_list=[
+        #         "-p scarf",
+        #         f"--job-name {label}",
+        #         f"--nodes={str(nodes)}",
+        #         "--exclusive",
+        #         "-C amd",
+        #         f"--time={wall_time}",
+        #     ],
+        #     modules=[
+        #         "AMDmodules",
+        #         "Python/3.10.4-GCCcore-11.3.0",
+        #         "CASTEP/21.1.1-iomkl-2021a"
+        #     ],
+        #     set_ups=[
+        #         f"source {path_to_venv}",
+        #         "CASENUM=`printf %03d $SLURM_ARRAY_TASK_ID`",
+        #         f"export CASTEP_COMMAND='{CASTEP_command}'"
+        #     ],
+        #     commands=[
+        #         "cd ./run/$CASENUM",
+        #         f"timeout {wall_time.split(':')[0]}h {CASTEP_command} {label}_$CASENUM",
+        #         "if [[ $? -eq 124 ]]; then",
+        #         '    cd -',
+        #         '    sbatch run_cont.slurm --array=$SLURM_ARRAY_TASK_ID',
+        #         'else',
+        #         f"    cp {label}_$CASENUM.castep ../../result/",
+        #         '    find . -name "*.check" -delete',
+        #         '    find . -name "*.check_bak" -delete',
+        #         '    find . -name "*.usp" -delete',
+        #         'fi',                
+        #     ]
+        # )
 
 def main():
     
