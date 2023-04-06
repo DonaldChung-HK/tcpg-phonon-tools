@@ -97,54 +97,14 @@ def phonopy_setup(
             commands=[
                 "cd ./run/$CASENUM",
                 f"timeout {wall_time.split(':')[0]}h {CASTEP_command} {label}_$CASENUM",
-                "if [[ $? -eq 124 ]]; then",
-                f'    cp {label}_$CASENUM.param.continuation {label}_$CASENUM.param',
-                '    cd -',
-                '    sbatch --array=$SLURM_ARRAY_TASK_ID run.slurm',
-                'else',
-                f"    cp {label}_$CASENUM.castep ../../result/",
-                '    find . -name "*.check" -delete',
-                '    find . -name "*.check_bak" -delete',
-                '    find . -name "*.usp" -delete',
-                'fi',                
+                f"cp {label}_$CASENUM.castep ../../result/",
+                'find . -name "*.check" -delete',
+                'find . -name "*.check_bak" -delete',
+                'find . -name "*.usp" -delete',    
             ]
         )
         with open("init.sh", "w") as f:
             f.write(f"#! /bin/bash -l\nsbatch --array={start}-{end} run.slurm")
-        # gen_slurm(
-        #     output=Path("run_cont.slurm"),
-        #     slurm_param_list=[
-        #         "-p scarf",
-        #         f"--job-name {label}",
-        #         f"--nodes={str(nodes)}",
-        #         "--exclusive",
-        #         "-C amd",
-        #         f"--time={wall_time}",
-        #     ],
-        #     modules=[
-        #         "AMDmodules",
-        #         "Python/3.10.4-GCCcore-11.3.0",
-        #         "CASTEP/21.1.1-iomkl-2021a"
-        #     ],
-        #     set_ups=[
-        #         f"source {path_to_venv}",
-        #         "CASENUM=`printf %03d $SLURM_ARRAY_TASK_ID`",
-        #         f"export CASTEP_COMMAND='{CASTEP_command}'"
-        #     ],
-        #     commands=[
-        #         "cd ./run/$CASENUM",
-        #         f"timeout {wall_time.split(':')[0]}h {CASTEP_command} {label}_$CASENUM",
-        #         "if [[ $? -eq 124 ]]; then",
-        #         '    cd -',
-        #         '    sbatch run_cont.slurm --array=$SLURM_ARRAY_TASK_ID',
-        #         'else',
-        #         f"    cp {label}_$CASENUM.castep ../../result/",
-        #         '    find . -name "*.check" -delete',
-        #         '    find . -name "*.check_bak" -delete',
-        #         '    find . -name "*.usp" -delete',
-        #         'fi',                
-        #     ]
-        # )
 
 def main():
     
