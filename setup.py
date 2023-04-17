@@ -28,7 +28,7 @@ def main():
             ],
         keywords='chemistry ase dftb+ xTB mantid',
         packages=find_packages(),
-        install_requires=['ase', 'spglib', 'matplotlib','pandas', 'scipy','matplotlib', 'phonopy'],
+        install_requires=['ase', 'spglib', 'matplotlib','pandas', 'scipy','matplotlib', 'phonopy', 'scikit-learn'],
         entry_points={
             'console_scripts': [
                 'dftbp-socket-setup = tcpg_phonon_tools.dftbp.dftbp_socket_hsd_setup:main',
@@ -41,6 +41,7 @@ def main():
                 'dftbp-phonopy-setup = tcpg_phonon_tools.dftbp.dftbp_phonopy_setup:main',
                 'crystal-opt-setup = tcpg_phonon_tools.Crystal.CrystalHelper:opt_setup_cli',
                 'crystal-phonopy-setup = tcpg_phonon_tools.Crystal.CrystalPhonopyHelper:phonopy_setup_cli',
+                'spectra-metric = tcpg_phonon_tools.Analysis.Visualise:metrics_cli'
                 ]
             },
         include_package_data=True,

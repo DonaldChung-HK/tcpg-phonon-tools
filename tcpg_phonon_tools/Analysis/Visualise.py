@@ -3,8 +3,11 @@ import pandas as pd
 
 import matplotlib.pyplot as plt
 
+from sklearn.metrics import mean_squared_error,r2_score
+import math
+
 from scipy.interpolate import interp1d
-from scipy.stats import wasserstein_distance
+from scipy.stats import wasserstein_distance, pearsonr
 
 import argparse
 
@@ -66,12 +69,12 @@ def emd_and_chart(
     if cumulative_emd_data != None or do_cumulative_emd:
         fig, axes = plt.subplots(edgecolor='#ffffff')
         axes2 = axes.twinx()
-        axes2.plot(cumulative_emd_df.iloc[:,0], cumulative_emd_df.iloc[:,1],color="brown", label='Cumulative_emd')
+        axes2.plot(cumulative_emd_df.iloc[:,0], cumulative_emd_df.iloc[:,1],color="brown", label='Cumulative_emd', linestyle='-', alpha=0.6)
         axes2.set_ylabel('Cumulative EMD')
     else:
         fig, axes = plt.subplots(edgecolor='#ffffff')
-    axes.plot(calculated_x, ref_y_inter, color='#1f77b4', label='Ref')
-    axes.plot(calculated_x, calculated_y,color='#ff7f0e', label='Calc')
+    axes.plot(calculated_x, ref_y_inter, color='#1f77b4', label='Ref',  linestyle='-', alpha=0.6)
+    axes.plot(calculated_x, calculated_y,color='#ff7f0e', label='Calc',  linestyle='-', alpha=0.6)
     
     axes.set_title(f'Ref VS Calculated | {emd_string}')
     axes.set_xlabel('Energy transfer ($cm^{-1}$)')
@@ -84,6 +87,15 @@ def emd_and_chart(
         plt.savefig(out_path)
         if do_cumulative_emd:
             cumulative_emd_df.to_csv(f"{out_path}_cumulative_emd.csv", index=False)
+            with open(f"{out_path}_plot.sh", "w") as f:
+                f.write(f"emd-chart --cumulative_emd_data {out_path}_cumulative_emd.csv -c {calculated_path} -r {ref_path} -m {min_energy} -x {cut_off}")
+        elif cumulative_emd_data != None:
+            with open(f"{out_path}_plot.sh", "w") as f:
+                f.write(f"emd-chart --cumulative_emd_data {cumulative_emd_data} -c {calculated_path} -r {ref_path} -m {min_energy} -x {cut_off}")
+        else:
+            with open(f"{out_path}_plot.sh", "w") as f:
+                f.write(f"emd-chart -c {calculated_path} -r {ref_path} -m {min_energy} -x {cut_off}")
+            
     else:
         plt.show()
 
@@ -126,7 +138,7 @@ def emd_and_chart_multi(
 
         emd_calc = wasserstein_distance(ref_y_inter, calculated_y) * (max(calculated_x) - min(calculated_x)) #the default weight is normalised to 1 so multiply it by the range will have a more readable number
         emd_string = f"{calculated_path.name} EMD: {emd_calc}"
-        axes.plot(calculated_x, calculated_y, label=calculated_path.name)
+        axes.plot(calculated_x, calculated_y, label=calculated_path.name, linestyle='-', alpha=0.6)
         print(emd_string)
         emd_result.append([calculated_path.name, emd_calc])
     
@@ -145,6 +157,8 @@ def emd_and_chart_multi(
     if out_path != None:
         plt.savefig(out_path)
         emd_result_df.to_csv(f'{out_path}.csv')
+        with open(f"{out_path}_plot.sh", "w") as f:
+            f.write(f"emd-chart-multi -c {' '.join(calculated_paths)} -r {ref_path} -m {min_energy} -x {cut_off}")
     else:
         print(emd_result_df)
         plt.show()
@@ -261,4 +275,107 @@ def emd_and_chart_multi_cli():
         cut_off = args.cut_off,
         min_energy=args.min_energy,
         out_path = args.out_path        
+    )
+
+
+def quant_metrics(
+        calculated_path = "foo_abins.csv",
+        ref_path = "foo_ref.csv", 
+        min_energy = 0.0, 
+        cut_off = 4000.0,
+        out_path = "metrics.csv",
+    ):
+    ref = pd.read_csv(ref_path)
+    ref = ref[ref[ref.columns[0]] <= cut_off]
+    ref = ref[ref[ref.columns[0]] >= min_energy]
+    ref_x = ref.iloc[:,0].to_numpy()
+    ref_y = ref.iloc[:,1].to_numpy()
+    auc_ref = np.trapz(ref_y, ref_x)
+    ref_y = ref_y / auc_ref
+
+    calculated = pd.read_csv(calculated_path)
+    calculated = calculated[calculated.iloc[:,0] >= ref_x.min()]
+    calculated = calculated[calculated.iloc[:,0] <= ref_x.max()]
+    calculated_x = calculated.iloc[:,0].to_numpy()
+    calculated_y = calculated.iloc[:,1].to_numpy()
+    auc_calculated = np.trapz(calculated_y, calculated_x)
+    calculated_y = calculated_y / auc_calculated
+
+    f = interp1d(ref_x, ref_y, kind='cubic')
+
+    ref_y_inter = f(calculated_x)
+
+    #y_top = max(max(ref_y_inter), max(calculated_y)) * 1.05
+
+    emd_calc = wasserstein_distance(ref_y_inter, calculated_y) * (max(calculated_x) - min(calculated_x)) #the default weight is normalised to 1 so multiply it by the range will have a more readable number
+    emd_string = f"EMD: {emd_calc}"
+    print(emd_string)
+    mse = mean_squared_error(ref_y_inter, calculated_y) * (max(calculated_x) - min(calculated_x)) # normalising the weight to the range for easier number
+    rmse = math.sqrt(mse)
+    print(f"Root Mean Square Error:{rmse}")
+    pcc = pearsonr(ref_y_inter, calculated_y)
+    pcc_score = pcc[0]
+    print(f"Pearson correlation coefficient: {pcc_score}")
+    r2 = r2_score(ref_y_inter, calculated_y)
+    print(f"r2 score: {r2}")
+
+    result_dict = {
+        "EMD":emd_calc,
+        "RMSE":rmse,
+        "PCC":pcc_score,
+        "R2":r2,
+    }
+    result = pd.DataFrame.from_records(list(result_dict.items()),columns=["Metrics", "Quantity"])
+    if out_path != None:
+        result.to_csv(out_path, index=False)
+    
+    return result_dict
+
+def metrics_cli():
+    parser = argparse.ArgumentParser(
+        description="""
+        conduct 1-d interpolation of reference y using f(calculated_x) scale the arbitry y using area under curve, calculate the quantitative metrics
+        """
+    )
+    parser.add_argument(
+        '-c',
+        '--calculated_input_file', 
+        type=str,
+        help="Path to csv of the abins calculation this should be one with smaller but even bin Width for interpolation"
+    )
+    parser.add_argument(
+        '-r',
+        '--ref_input_file',
+        type=str,
+        help="reference spectrum usually from ins_db in csv"
+    )
+    parser.add_argument(
+        '-x',
+        '--cut_off',
+        type=float,
+        default=4000.0,
+        help="upper bound of the spectrum"
+    )
+    parser.add_argument(
+        '-m',
+        '--min_energy',
+        type=float,
+        default=0.0,
+        help="upper bound of the spectrum"
+    )    
+    parser.add_argument(
+        '-o',
+        '--out_path',
+        type=str,
+        default=None,
+        help="out_put the figure to file. If None it will just show it"
+    )
+    args = parser.parse_args()
+
+    quant_metrics(
+        calculated_path = args.calculated_input_file,
+        ref_path = args.ref_input_file, 
+        cut_off = args.cut_off,
+        min_energy=args.min_energy,
+        out_path = args.out_path,
     )
