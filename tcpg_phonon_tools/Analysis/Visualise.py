@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 
 import matplotlib.pyplot as plt
+import matplotlib as mpl
 
 from sklearn.metrics import mean_squared_error,r2_score
 import math
@@ -15,6 +16,11 @@ from pathlib import Path
 
 import sys
 
+# reserving '#1f77b4' for reference
+from cycler import cycler
+mpl.rcParams['axes.prop_cycle'] = cycler('color', ['#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf'])
+
+
 def emd_and_chart(
         calculated_path = "foo_abins.csv",
         ref_path = "foo_ref.csv", 
@@ -23,12 +29,18 @@ def emd_and_chart(
         out_path = "fig.png",
         do_cumulative_emd = True,
         cumulative_emd_data = None,
+        do_error_range = True,
     ):
     ref = pd.read_csv(ref_path)
     ref = ref[ref[ref.columns[0]] <= cut_off]
     ref = ref[ref[ref.columns[0]] >= min_energy]
     ref_x = ref.iloc[:,0].to_numpy()
     ref_y = ref.iloc[:,1].to_numpy()
+    try:
+        ref_error = ref.iloc[:,2].to_numpy()
+    except:
+        print("No error data in reference")
+        do_error_range = False
     auc_ref = np.trapz(ref_y, ref_x)
     ref_y = ref_y / auc_ref
 
@@ -66,16 +78,30 @@ def emd_and_chart(
 
     print("Drawing Fig")
 
+
+
     if cumulative_emd_data != None or do_cumulative_emd:
         fig, axes = plt.subplots(edgecolor='#ffffff')
         axes2 = axes.twinx()
-        axes2.plot(cumulative_emd_df.iloc[:,0], cumulative_emd_df.iloc[:,1],color="brown", label='Cumulative_emd', linestyle='-', alpha=0.6)
+        axes2.plot(cumulative_emd_df.iloc[:,0], cumulative_emd_df.iloc[:,1],color="brown", label='Cumulative_emd', linestyle='-', alpha=0.6, linewidth=0.6)
         axes2.set_ylabel('Cumulative EMD')
     else:
         fig, axes = plt.subplots(edgecolor='#ffffff')
-    axes.plot(calculated_x, ref_y_inter, color='#1f77b4', label='Ref',  linestyle='-', alpha=0.6)
-    axes.plot(calculated_x, calculated_y,color='#ff7f0e', label='Calc',  linestyle='-', alpha=0.6)
+    axes.plot(calculated_x, ref_y_inter,color='#1f77b4', label='Ref',  linestyle='-', alpha=0.7, linewidth=0.7)
+    axes.plot(calculated_x, calculated_y,color='#ff7f0e', label='Calc',  linestyle='-', alpha=0.7, linewidth=0.7)
     
+    if do_error_range:
+        ref_error = ref_error / auc_ref
+        # plotting the error range is basically a linear interpolation
+        # need to thin about this
+        f_error = interp1d(ref_x, ref_error, kind='cubic')
+        ref_error_inter = f_error(calculated_x)
+        
+        axes.fill_between(calculated_x, ref_y_inter-ref_error_inter, ref_y_inter+ref_error_inter, color='lightpink',alpha=0.6)
+
+        # axes.fill_between(ref_x, ref_y-ref_error, ref_y+ref_error, color='#1f77b4',alpha=0.4, interpolate="cubic")
+
+
     axes.set_title(f'Ref VS Calculated | {emd_string}')
     axes.set_xlabel('Energy transfer ($cm^{-1}$)')
     axes.set_ylabel('S / Arbitrary Units ($cm^{-1}$)$^{-1}$')
@@ -84,17 +110,23 @@ def emd_and_chart(
     legend = axes.legend(fontsize=8.0).set_draggable(True).legend
 
     if out_path != None:
-        plt.savefig(out_path)
+        plt.tight_layout()
+        plt.savefig(out_path, dpi=600)
         if do_cumulative_emd:
             cumulative_emd_df.to_csv(f"{out_path}_cumulative_emd.csv", index=False)
-            with open(f"{out_path}_plot.sh", "w") as f:
-                f.write(f"emd-chart --cumulative_emd_data {out_path}_cumulative_emd.csv -c {calculated_path} -r {ref_path} -m {min_energy} -x {cut_off}")
+            command = f"emd-chart --cumulative_emd_data {out_path}_cumulative_emd.csv -c {calculated_path} -r {ref_path} -m {min_energy} -x {cut_off}"
         elif cumulative_emd_data != None:
-            with open(f"{out_path}_plot.sh", "w") as f:
-                f.write(f"emd-chart --cumulative_emd_data {cumulative_emd_data} -c {calculated_path} -r {ref_path} -m {min_energy} -x {cut_off}")
+            command = f"emd-chart --cumulative_emd_data {cumulative_emd_data} -c {calculated_path} -r {ref_path} -m {min_energy} -x {cut_off}"
         else:
-            with open(f"{out_path}_plot.sh", "w") as f:
-                f.write(f"emd-chart -c {calculated_path} -r {ref_path} -m {min_energy} -x {cut_off}")
+            command = f"emd-chart -c {calculated_path} -r {ref_path} -m {min_energy} -x {cut_off}"
+
+
+        if do_error_range:
+            command += " --do_error_range"
+        
+        with open(f"{out_path}_plot.sh", "w") as f:
+            f.write(command)
+        
             
     else:
         plt.show()
@@ -138,13 +170,13 @@ def emd_and_chart_multi(
 
         emd_calc = wasserstein_distance(ref_y_inter, calculated_y) * (max(calculated_x) - min(calculated_x)) #the default weight is normalised to 1 so multiply it by the range will have a more readable number
         emd_string = f"{calculated_path.name} EMD: {emd_calc}"
-        axes.plot(calculated_x, calculated_y, label=calculated_path.name, linestyle='-', alpha=0.6)
+        axes.plot(calculated_x, calculated_y, label=calculated_path.name, linestyle='-', alpha=0.6, linewidth=0.7)
         print(emd_string)
         emd_result.append([calculated_path.name, emd_calc])
     
     y_top = max(y_top, max(ref_y_inter)* 1.05)
 
-    axes.plot(calculated_x, ref_y_inter, label='Ref')
+    axes.plot(calculated_x, ref_y_inter, label='Ref', alpha=0.7, color='#1f77b4', linewidth=0.7)
     axes.set_title('Ref VS Calculated')
     axes.set_xlabel('Energy transfer ($cm^{-1}$)')
     axes.set_ylabel('S / Arbitrary Units ($cm^{-1}$)$^{-1}$')
@@ -155,7 +187,8 @@ def emd_and_chart_multi(
     emd_result_df = pd.DataFrame(emd_result, columns=['Label', 'EMD'])
 
     if out_path != None:
-        plt.savefig(out_path)
+        plt.tight_layout()
+        plt.savefig(out_path, dpi=600)
         emd_result_df.to_csv(f'{out_path}.csv')
         with open(f"{out_path}_plot.sh", "w") as f:
             f.write(f"emd-chart-multi -c {' '.join(calculated_paths)} -r {ref_path} -m {min_energy} -x {cut_off}")
@@ -210,6 +243,11 @@ def emd_and_chart_cli():
         help="calculate and show cumulative emd in seondary y axis"
     )
     parser.add_argument(
+        '--do_error_range',
+        action="store_true",
+        help="calculate and show error range"
+    )
+    parser.add_argument(
         '--cumulative_emd_data',
         type=str,
         default=None,
@@ -224,7 +262,8 @@ def emd_and_chart_cli():
         min_energy=args.min_energy,
         out_path = args.out_path,
         do_cumulative_emd=args.do_cumulative_emd,
-        cumulative_emd_data=args.cumulative_emd_data,     
+        cumulative_emd_data=args.cumulative_emd_data,
+        do_error_range =args.do_error_range,      
     )
 
 def emd_and_chart_multi_cli():
@@ -274,7 +313,7 @@ def emd_and_chart_multi_cli():
         ref_path = args.ref_input_file, 
         cut_off = args.cut_off,
         min_energy=args.min_energy,
-        out_path = args.out_path        
+        out_path = args.out_path,     
     )
 
 
