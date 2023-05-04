@@ -33,6 +33,7 @@ def color_picker(name):
     crystal_pattern = re.compile("CRYSTAL")
     gfn1_pattern = re.compile("GFN1")
     gfn2_pattern = re.compile("GFN2")
+    torchani_pattern = re.compile("TorchANI")
     if castep_pattern.search(name):
         return '#ff7f00'
     elif crystal_pattern.search(name):
@@ -41,6 +42,8 @@ def color_picker(name):
         return '#984ea3'
     elif gfn2_pattern.search(name):
         return '#a65628'
+    elif torchani_pattern.search(name):
+        return '#4daf4a'
     else:
         return '#999999'
 
@@ -49,6 +52,7 @@ def label_picker(name):
     crystal_pattern = re.compile("CRYSTAL")
     gfn1_pattern = re.compile("GFN1")
     gfn2_pattern = re.compile("GFN2")
+    torchani_pattern = re.compile("TorchANI")
     name = str(name)
     if castep_pattern.search(name):
         return 'CASTEP'
@@ -58,6 +62,8 @@ def label_picker(name):
         return 'GFN1'
     elif gfn2_pattern.search(name):
         return 'GFN2'
+    elif torchani_pattern.search(name):
+        return 'TorchANI'
     else:
         return 'Unknown'
 
@@ -399,7 +405,7 @@ def chart_multi_filter_cli():
         '-m',
         '--min_energy',
         type=float,
-        default=0.0,
+        default=0.001,
         help="upper bound of the spectrum"
     )    
     parser.add_argument(

@@ -9,7 +9,7 @@ from phonopy import Phonopy
 from phonopy.structure.atoms import PhonopyAtoms
 import numpy as np
 import argparse
-
+from datetime import datetime
 def torchANI_phonon(input_file,
                     dim = [2, 2, 2],
                     ):
@@ -19,6 +19,7 @@ def torchANI_phonon(input_file,
         input (_type_): _description_
         dim (list, optional): _description_. Defaults to [2, 2, 2].
     """
+    start = datetime.now()
     a = read(input_file)
     a.set_constraint(FixSymmetry(a))
     calculator = torchani.models.ANI2x().double().ase()
@@ -38,7 +39,7 @@ def torchANI_phonon(input_file,
     phonopy = Phonopy(atoms_phonopy, supercell_matrix=np.diag(dim),
                     primitive_matrix=None)
 
-    phonopy.generate_displacements()
+    phonopy.generate_displacements(distance=0.02, is_plusminus=True)
     supercells = phonopy.supercells_with_displacements
     i = 0
     forces_holder = []
@@ -50,11 +51,14 @@ def torchANI_phonon(input_file,
             symbols = supercell.symbols,
             positions = supercell.positions,
             cell = supercell.cell,
+            pbc = True,
         )
         b.calc = calculator
         forces_holder.append(b.get_forces())
         i+=1
+        print(f"{i} done: {datetime.now()-start}")
         b.write(displacement_dir / f"{i}.gen")
+
         
     phonopy.forces = forces_holder
     phonopy.produce_force_constants()
