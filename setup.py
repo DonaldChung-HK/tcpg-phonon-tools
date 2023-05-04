@@ -37,11 +37,15 @@ def main():
                 'abins-mantid-runner = tcpg_phonon_tools.Analysis.MantidHelper:cli_mantid_abins',
                 'emd-chart = tcpg_phonon_tools.Analysis.Visualise:emd_and_chart_cli',
                 'emd-chart-multi = tcpg_phonon_tools.Analysis.Visualise:emd_and_chart_multi_cli',
+                'chart-multi = tcpg_phonon_tools.Analysis.Visualise:chart_multi_cli',
                 'castep-phonopy-setup = tcpg_phonon_tools.CASTEP.CastepHelperPhonopy:main',
                 'dftbp-phonopy-setup = tcpg_phonon_tools.dftbp.dftbp_phonopy_setup:main',
                 'crystal-opt-setup = tcpg_phonon_tools.Crystal.CrystalHelper:opt_setup_cli',
                 'crystal-phonopy-setup = tcpg_phonon_tools.Crystal.CrystalPhonopyHelper:phonopy_setup_cli',
-                'spectra-metric = tcpg_phonon_tools.Analysis.Visualise:metrics_cli'
+                'spectra-metric = tcpg_phonon_tools.Analysis.Visualise:metrics_cli',
+                'emd-chart-filter = tcpg_phonon_tools.Analysis.Visualise:emd_and_chart_filter_cli',
+                'chart-multi-filter = tcpg_phonon_tools.Analysis.Visualise:chart_multi_filter_cli',
+                'torchani-runner = tcpg_phonon_tools.TorchANI.TorchANI_runner:torchANI_runner_cli'
                 ]
             },
         include_package_data=True,
